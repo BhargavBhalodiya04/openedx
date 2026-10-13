@@ -3,20 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AndAI Platform - Rebranding Preview</title>
+  <title>AndAI Platform - Complete Suite Preview</title>
   <link rel="icon" type="image/x-icon" href="lms/static/images/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --andai-dark: #1e2632;
-      --andai-blue: #1a73e8;
+      --andai-dark: #0f172a;
+      --andai-navy: #1e293b;
+      --andai-blue: #2563eb;
+      --andai-blue-hover: #1d4ed8;
       --andai-bg: #f8fafc;
       --andai-card-bg: #ffffff;
       --andai-border: #e2e8f0;
       --andai-text-main: #0f172a;
       --andai-text-muted: #64748b;
+      --studio-dark: #1e293b;
+      --django-header: #0f172a;
+      --django-accent: #2563eb;
     }
 
     * {
@@ -27,333 +32,846 @@
 
     body {
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--andai-bg);
-      color: var(--andai-text-main);
-      line-height: 1.5;
+      background-color: #0b0f17;
+      color: #f1f5f9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-
-    /* LMS Header */
-    .preview-header {
-      background-color: #ffffff;
-      border-bottom: 1px solid var(--andai-border);
-      padding: 12px 32px;
+    /* Top Control Bar */
+    .top-bar {
+      background: #111827;
+      border-bottom: 1px solid #1f2937;
+      padding: 14px 28px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
 
-    .brand-group {
+    .top-left {
       display: flex;
       align-items: center;
-      gap: 12px;
-      text-decoration: none;
+      gap: 16px;
     }
 
-    .brand-logo {
-      height: 48px;
-      width: 48px;
-      object-fit: contain;
+    .top-badge {
+      background: #1e3a8a;
+      color: #93c5fd;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
     }
 
-    .brand-name {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--andai-dark);
-      letter-spacing: -0.03em;
+    .top-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #ffffff;
     }
 
-    .nav-links {
+    /* Navigation Switcher Tabs */
+    .tab-nav {
       display: flex;
-      align-items: center;
-      gap: 24px;
-      list-style: none;
+      background: #1f2937;
+      padding: 4px;
+      border-radius: 8px;
+      gap: 4px;
     }
 
-    .nav-links a {
-      color: var(--andai-text-main);
-      text-decoration: none;
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 0.9rem;
       font-weight: 600;
-      font-size: 0.95rem;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover {
-      color: var(--andai-blue);
-    }
-
-    .btn-primary {
-      background-color: var(--andai-blue);
-      color: white !important;
       padding: 8px 18px;
       border-radius: 6px;
-      font-weight: 600;
-      transition: opacity 0.2s;
-    }
-
-    .btn-primary:hover {
-      opacity: 0.9;
-    }
-
-    /* Container */
-    .container {
-      max-width: 1200px;
-      margin: 40px auto;
-      padding: 0 24px;
-    }
-
-    .section-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--andai-dark);
-      margin-bottom: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       gap: 8px;
     }
 
-    .grid-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 24px;
-      margin-bottom: 40px;
+    .tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
     }
 
-    .card {
-      background: var(--andai-card-bg);
-      border: 1px solid var(--andai-border);
-      border-radius: 12px;
+    .tab-btn.active {
+      background: var(--andai-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Tab Content Frame */
+    .preview-viewport {
+      flex: 1;
       padding: 24px;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-
-    .card h3 {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--andai-dark);
-      margin-bottom: 12px;
-    }
-
-    .card p {
-      color: var(--andai-text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 16px;
-    }
-
-    .asset-showcase {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #f1f5f9;
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 16px;
-    }
-
-    .asset-showcase.dark-bg {
-      background-color: var(--andai-dark);
-    }
-
-    /* Studio Header Preview */
-    .studio-preview {
-      background-color: #273142;
-      border-radius: 8px;
-      padding: 12px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: white;
-    }
-
-    .studio-brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .studio-brand span {
-      font-weight: 700;
-      font-size: 1.2rem;
-    }
-
-    /* LMS Footer */
-    .preview-footer {
-      background-color: var(--andai-dark);
-      color: #94a3b8;
-      padding: 48px 32px 24px 32px;
-      margin-top: 60px;
-    }
-
-    .footer-inner {
-      max-width: 1200px;
+      max-width: 1400px;
       margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 32px;
+      width: 100%;
     }
 
-    .footer-brand {
+    .portal-frame {
+      background: #ffffff;
+      color: var(--andai-text-main);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+      display: none;
+    }
+
+    .portal-frame.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================================
+       TAB 1: LEARNER PLATFORM (LMS)
+       ========================================================================== */
+    .lms-navbar {
+      background: #ffffff;
+      border-bottom: 1px solid var(--andai-border);
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .lms-brand {
       display: flex;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
+      text-decoration: none;
     }
 
-    .footer-brand span {
+    .lms-brand img {
+      height: 44px;
+      width: 44px;
+      object-fit: contain;
+    }
+
+    .lms-brand span {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--andai-dark);
+      letter-spacing: -0.02em;
+    }
+
+    .lms-nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+      align-items: center;
+    }
+
+    .lms-nav-links a {
+      color: var(--andai-text-main);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .lms-btn-reg {
+      background: var(--andai-blue);
+      color: #ffffff !important;
+      padding: 8px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .lms-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #ffffff;
+      padding: 64px 32px;
+      text-align: center;
+    }
+
+    .lms-hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .lms-hero p {
+      color: #94a3b8;
+      font-size: 1.15rem;
+      max-width: 600px;
+      margin: 0 auto 28px auto;
+    }
+
+    .lms-search {
+      max-width: 520px;
+      margin: 0 auto;
+      display: flex;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .lms-search input {
+      flex: 1;
+      border: none;
+      padding: 12px 16px;
+      font-size: 1rem;
+      outline: none;
+      color: #0f172a;
+    }
+
+    .lms-search button {
+      background: var(--andai-blue);
       color: white;
+      border: none;
+      padding: 12px 24px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .lms-content {
+      padding: 48px 32px;
+      background: #f8fafc;
+    }
+
+    .lms-courses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .course-card {
+      background: #ffffff;
+      border: 1px solid var(--andai-border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .course-thumb {
+      height: 160px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2.5rem;
+      font-weight: 800;
+    }
+
+    .course-body {
+      padding: 20px;
+    }
+
+    .course-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--andai-blue);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .course-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--andai-dark);
+      margin-bottom: 8px;
+    }
+
+    .course-org {
+      font-size: 0.85rem;
+      color: var(--andai-text-muted);
+    }
+
+    /* Clean AndAI LMS Footer */
+    .clean-footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 40px 32px 24px 32px;
+    }
+
+    .footer-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 24px;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 24px;
+    }
+
+    .footer-brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-brand-wrap img {
+      height: 40px;
+      width: 40px;
+    }
+
+    .footer-brand-wrap span {
+      color: #ffffff;
       font-weight: 800;
       font-size: 1.3rem;
     }
 
-    .footer-links {
+    .footer-nav {
       display: flex;
       gap: 20px;
       list-style: none;
-      margin-top: 12px;
     }
 
-    .footer-links a {
+    .footer-nav a {
       color: #94a3b8;
       text-decoration: none;
       font-size: 0.85rem;
     }
 
-    .footer-links a:hover {
+    .footer-nav a:hover {
+      color: #ffffff;
+    }
+
+    .footer-legal-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    /* ==========================================================================
+       TAB 2: STUDIO (CMS)
+       ========================================================================== */
+    .studio-navbar {
+      background: #1e293b;
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       color: white;
     }
 
-    .footer-bottom {
-      max-width: 1200px;
-      margin: 32px auto 0 auto;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    .studio-brand-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: white;
+    }
+
+    .studio-brand-link img {
+      height: 38px;
+      width: 38px;
+    }
+
+    .studio-brand-link span {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    .studio-nav-menu {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+      align-items: center;
+      font-size: 0.9rem;
+    }
+
+    .studio-nav-menu a {
+      color: #cbd5e1;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .studio-user-badge {
+      background: #334155;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .studio-content {
+      background: #f1f5f9;
+      padding: 36px 32px;
+    }
+
+    .studio-header-action {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .studio-title-main {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .studio-btn-new {
+      background: var(--andai-blue);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .studio-courses-table {
+      background: #ffffff;
+      border-radius: 8px;
+      border: 1px solid var(--andai-border);
+      overflow: hidden;
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .studio-courses-table th {
+      background: #f8fafc;
+      text-align: left;
+      padding: 14px 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #475569;
+      border-bottom: 1px solid var(--andai-border);
+    }
+
+    .studio-courses-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--andai-border);
+      font-size: 0.9rem;
+      color: #1e293b;
+    }
+
+    .studio-badge-published {
+      background: #dcfce7;
+      color: #166534;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    .studio-clean-footer {
+      background: #0f172a;
+      padding: 24px 32px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    /* ==========================================================================
+       TAB 3: DJANGO ADMINISTRATION PANEL
+       ========================================================================== */
+    .django-header-bar {
+      background: #0f172a;
+      color: #ffffff;
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .django-brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-decoration: none;
+      letter-spacing: -0.01em;
+    }
+
+    .django-userlinks {
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .django-userlinks a {
+      color: #93c5fd;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .django-breadcrumbs {
+      background: #1e293b;
+      padding: 10px 28px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .django-breadcrumbs a {
+      color: #cbd5e1;
+      text-decoration: none;
+    }
+
+    .django-admin-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      padding: 28px;
+      background: #f8fafc;
+    }
+
+    .django-module {
+      background: #ffffff;
+      border: 1px solid var(--andai-border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .django-module-header {
+      background: #f1f5f9;
+      padding: 12px 18px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #1e293b;
+      border-bottom: 1px solid var(--andai-border);
+    }
+
+    .django-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+
+    .django-row:last-child {
+      border-bottom: none;
+    }
+
+    .django-row a {
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .django-actions a {
       color: #64748b;
+      font-size: 0.8rem;
+      margin-left: 10px;
+    }
+
+    .django-sidebar-card {
+      background: #ffffff;
+      border: 1px solid var(--andai-border);
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .django-sidebar-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #0f172a;
     }
   </style>
 </head>
 <body>
 
-
-  <!-- 1. LMS Live Header Preview -->
-  <header class="preview-header">
-    <a href="#" class="brand-group">
-      <img src="lms/static/images/logo.png" alt="AndAI Logo" class="brand-logo">
-      <span class="brand-name">AndAI</span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#">Explore Courses</a></li>
-      <li><a href="#">Programs & Degrees</a></li>
-      <li><a href="#">About</a></li>
-      <li><a href="#">Sign In</a></li>
-      <li><a href="#" class="btn-primary">Register Free</a></li>
-    </ul>
-  </header>
-
-  <main class="container">
-    <h2 class="section-title">🎨 Brand Asset Deployment Status</h2>
-    <div class="grid-cards">
-      <!-- Card 1 -->
-      <div class="card">
-        <h3>LMS Navbar Brand Logo</h3>
-        <p>Used in <code>lms/templates/header/brand.html</code> and mobile responsive views.</p>
-        <div class="asset-showcase">
-          <img src="lms/static/images/logo.png" alt="AndAI Logo" style="height: 64px;">
-        </div>
-        <p><strong>Path:</strong> <code>themes/andai-theme/lms/static/images/logo.png</code></p>
-      </div>
-
-      <!-- Card 2 -->
-      <div class="card">
-        <h3>High-DPI / Large Brand Logo</h3>
-        <p>Used on splash pages, hero cards, and certificate verifications.</p>
-        <div class="asset-showcase dark-bg">
-          <img src="lms/static/images/logo-large.png" alt="AndAI Large Logo" style="height: 64px;">
-        </div>
-        <p><strong>Path:</strong> <code>themes/andai-theme/lms/static/images/logo-large.png</code></p>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="card">
-        <h3>Studio (CMS) Brand Bar</h3>
-        <p>Used in <code>cms/templates/widgets/header.html</code> for authoring courses.</p>
-        <div class="studio-preview">
-          <div class="studio-brand">
-            <img src="cms/static/images/studio-logo.png" alt="AndAI Studio Logo" style="height: 36px;">
-            <span>AndAI Studio</span>
-          </div>
-          <div style="font-size: 0.85rem; color: #94a3b8;">Staff Course Tools</div>
-        </div>
-        <p style="margin-top: 16px;"><strong>Path:</strong> <code>themes/andai-theme/cms/static/images/studio-logo.png</code></p>
-      </div>
+  <!-- TOP SUITE CONTROLLER -->
+  <div class="top-bar">
+    <div class="top-left">
+      <span class="top-badge">Live Interactive Suite</span>
+      <h1 class="top-title">AndAI Platform</h1>
     </div>
 
-    <h2 class="section-title">⚙️ Django Configuration Status</h2>
-    <div class="card">
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
-        <tr style="border-bottom: 1px solid var(--andai-border);">
-          <th style="text-align: left; padding: 10px 0;">Setting Variable</th>
-          <th style="text-align: left; padding: 10px 0;">Configured Value</th>
-          <th style="text-align: left; padding: 10px 0;">Configuration File</th>
-        </tr>
-        <tr style="border-bottom: 1px solid var(--andai-border);">
-          <td style="padding: 10px 0; font-family: monospace;">PLATFORM_NAME</td>
-          <td style="padding: 10px 0; font-weight: 700; color: var(--andai-blue);">"AndAI"</td>
-          <td style="padding: 10px 0; color: var(--andai-text-muted);">openedx/envs/common.py</td>
-        </tr>
-        <tr style="border-bottom: 1px solid var(--andai-border);">
-          <td style="padding: 10px 0; font-family: monospace;">STUDIO_NAME</td>
-          <td style="padding: 10px 0; font-weight: 700; color: var(--andai-blue);">"AndAI Studio"</td>
-          <td style="padding: 10px 0; color: var(--andai-text-muted);">cms/envs/common.py</td>
-        </tr>
-        <tr style="border-bottom: 1px solid var(--andai-border);">
-          <td style="padding: 10px 0; font-family: monospace;">DEFAULT_SITE_THEME</td>
-          <td style="padding: 10px 0; font-weight: 700; color: var(--andai-blue);">"andai-theme"</td>
-          <td style="padding: 10px 0; color: var(--andai-text-muted);">openedx/envs/common.py</td>
-        </tr>
-        <tr>
-          <td style="padding: 10px 0; font-family: monospace;">ENABLE_COMPREHENSIVE_THEMING</td>
-          <td style="padding: 10px 0; font-weight: 700; color: #16a34a;">True</td>
-          <td style="padding: 10px 0; color: var(--andai-text-muted);">openedx/envs/common.py</td>
-        </tr>
-      </table>
-    </div>
-  </main>
+    <!-- TABS -->
+    <nav class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('lms', this)">
+        <span>🎓</span> Learner Platform (LMS)
+      </button>
+      <button class="tab-btn" onclick="switchTab('cms', this)">
+        <span>🛠️</span> AndAI Studio (CMS)
+      </button>
+      <button class="tab-btn" onclick="switchTab('admin', this)">
+        <span>⚡</span> Django Administration
+      </button>
+    </nav>
+  </div>
 
-  <!-- 3. LMS Live Footer Preview -->
-  <footer class="preview-footer">
-    <div class="footer-inner">
-      <div>
-        <div class="footer-brand">
-          <img src="lms/static/images/logo.png" alt="AndAI Logo" style="height: 38px;">
+  <div class="preview-viewport">
+
+    <!-- ====================================================================
+         PORTAL 1: LEARNER PLATFORM (LMS)
+         ==================================================================== -->
+    <div id="tab-lms" class="portal-frame active">
+      <!-- Header -->
+      <header class="lms-navbar">
+        <a href="#" class="lms-brand">
+          <img src="lms/static/images/logo.png" alt="AndAI Logo">
           <span>AndAI</span>
-        </div>
-        <p style="font-size: 0.9rem;">Empowering intelligent learning and skill transformation through AI-first education.</p>
-        <ul class="footer-links">
+        </a>
+        <ul class="lms-nav-links">
+          <li><a href="#">Explore Courses</a></li>
+          <li><a href="#">Degrees & Certificates</a></li>
           <li><a href="#">About AndAI</a></li>
-          <li><a href="#">Explore Catalog</a></li>
-          <li><a href="#">Contact Us</a></li>
-          <li><a href="#">Help Center</a></li>
+          <li><a href="#">Sign In</a></li>
+          <li><a href="#" class="lms-btn-reg">Register Free</a></li>
         </ul>
+      </header>
+
+      <!-- Hero Banner -->
+      <section class="lms-hero">
+        <h1>Learn Without Limits</h1>
+        <p>Explore thousands of next-generation courses powered by artificial intelligence and expert instructors.</p>
+        <div class="lms-search">
+          <input type="text" placeholder="What do you want to learn today?">
+          <button type="button">Search</button>
+        </div>
+      </section>
+
+      <!-- Content -->
+      <section class="lms-content">
+        <h2 style="font-size: 1.3rem; font-weight: 800; margin-bottom: 20px; color: #0f172a;">Featured Courses</h2>
+        <div class="lms-courses-grid">
+          <div class="course-card">
+            <div class="course-thumb">AI</div>
+            <div class="course-body">
+              <div class="course-tag">Artificial Intelligence</div>
+              <h3 class="course-title">Deep Learning & LLM Systems</h3>
+              <p class="course-org">AndAI Institute</p>
+            </div>
+          </div>
+          <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, #059669, #047857);">DS</div>
+            <div class="course-body">
+              <div class="course-tag">Data Science</div>
+              <h3 class="course-title">Applied Machine Learning</h3>
+              <p class="course-org">AndAI Labs</p>
+            </div>
+          </div>
+          <div class="course-card">
+            <div class="course-thumb" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">CS</div>
+            <div class="course-body">
+              <div class="course-tag">Computer Science</div>
+              <h3 class="course-title">Cloud Native Architecture</h3>
+              <p class="course-org">AndAI Academy</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Clean Footer (No Open edX / No edX Trademarks) -->
+      <footer class="clean-footer">
+        <div class="footer-top">
+          <div class="footer-brand-wrap">
+            <img src="lms/static/images/logo.png" alt="AndAI Logo">
+            <span>AndAI</span>
+          </div>
+          <ul class="footer-nav">
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Honor Code</a></li>
+            <li><a href="#">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-legal-bottom">
+          <div>&copy; 2026 AndAI. All rights reserved.</div>
+          <div style="color: #64748b;">Enterprise Learning Platform</div>
+        </div>
+      </footer>
+    </div>
+
+
+    <!-- ====================================================================
+         PORTAL 2: ANDAI STUDIO (CMS)
+         ==================================================================== -->
+    <div id="tab-cms" class="portal-frame">
+      <!-- Studio Header -->
+      <header class="studio-navbar">
+        <a href="#" class="studio-brand-link">
+          <img src="cms/static/images/studio-logo.png" alt="AndAI Studio Logo">
+          <span>AndAI Studio</span>
+        </a>
+        <ul class="studio-nav-menu">
+          <li><a href="#" style="color: #60a5fa;">Courses</a></li>
+          <li><a href="#">Content Libraries</a></li>
+          <li><a href="#">Settings</a></li>
+          <li><a href="#">Tools</a></li>
+          <li class="studio-user-badge">👤 admin</li>
+        </ul>
+      </header>
+
+      <!-- Studio Course Listing Area -->
+      <section class="studio-content">
+        <div class="studio-header-action">
+          <div>
+            <h2 class="studio-title-main">Courses Authoring Hub</h2>
+            <p style="color: #64748b; font-size: 0.9rem;">Manage, build, and publish courses on AndAI.</p>
+          </div>
+          <a href="#" class="studio-btn-new">➕ Create New Course</a>
+        </div>
+
+        <table class="studio-courses-table">
+          <thead>
+            <tr>
+              <th>Course Name</th>
+              <th>Organization</th>
+              <th>Course Code</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Introduction to Generative AI</strong></td>
+              <td>AndAI</td>
+              <td>AI-101</td>
+              <td><span class="studio-badge-published">Published</span></td>
+              <td><a href="#" style="color: #2563eb; text-decoration: none; font-weight: 600;">Edit Outline &rarr;</a></td>
+            </tr>
+            <tr>
+              <td><strong>Neural Networks & Transformers</strong></td>
+              <td>AndAI</td>
+              <td>AI-202</td>
+              <td><span class="studio-badge-published">Published</span></td>
+              <td><a href="#" style="color: #2563eb; text-decoration: none; font-weight: 600;">Edit Outline &rarr;</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Clean Studio Footer (No edX Trademarks, No Help Drawer, No Open edX Logos) -->
+      <footer class="studio-clean-footer">
+        <div>&copy; 2026 AndAI Studio. All rights reserved.</div>
+        <div>
+          <a href="#" style="color: #94a3b8; text-decoration: none; margin-left: 16px;">Terms of Service</a>
+          <a href="#" style="color: #94a3b8; text-decoration: none; margin-left: 16px;">Privacy Policy</a>
+          <a href="#" style="color: #60a5fa; text-decoration: none; margin-left: 16px; font-weight: 600;">Learner Portal &rarr;</a>
+        </div>
+      </footer>
+    </div>
+
+
+    <!-- ====================================================================
+         PORTAL 3: DJANGO ADMINISTRATION PANEL
+         ==================================================================== -->
+    <div id="tab-admin" class="portal-frame">
+      <!-- Admin Header -->
+      <header class="django-header-bar">
+        <a href="#" class="django-brand-title">AndAI Administration</a>
+        <div class="django-userlinks">
+          WELCOME, <strong>ADMIN</strong>. /
+          <a href="#">VIEW SITE</a> /
+          <a href="#">DOCUMENTATION</a> /
+          <a href="#">LOG OUT</a>
+        </div>
+      </header>
+
+      <!-- Admin Breadcrumbs -->
+      <div class="django-breadcrumbs">
+        <a href="#">Home</a> &rsaquo; AndAI Administration Site
       </div>
-      <div>
-        <h4 style="color: white; margin-bottom: 12px; font-size: 0.95rem;">Legal & Trust</h4>
-        <ul class="footer-links" style="flex-direction: column; gap: 8px;">
-          <li><a href="#">Terms of Service</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Honor Code</a></li>
-          <li><a href="#">Accessibility Statement</a></li>
-        </ul>
+
+      <!-- Admin Modules Area -->
+      <div class="django-admin-grid">
+        <div>
+          <!-- Module 1: Site Configuration -->
+          <div class="django-module">
+            <div class="django-module-header">SITE CONFIGURATION & THEMING</div>
+            <div class="django-row">
+              <a href="#">Site configurations</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+            <div class="django-row">
+              <a href="#">Site themes (andai-theme)</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+            <div class="django-row">
+              <a href="#">Sites (135.235.139.90.nip.io)</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+          </div>
+
+          <!-- Module 2: Authentication & Authorization -->
+          <div class="django-module">
+            <div class="django-module-header">AUTHENTICATION AND AUTHORIZATION</div>
+            <div class="django-row">
+              <a href="#">Groups</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+            <div class="django-row">
+              <a href="#">Users (admin)</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+          </div>
+
+          <!-- Module 3: OAuth2 Provider -->
+          <div class="django-module">
+            <div class="django-module-header">DJANGO OAUTH TOOLKIT</div>
+            <div class="django-row">
+              <a href="#">Applications (cms-sso)</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+            <div class="django-row">
+              <a href="#">Access tokens</a>
+              <div class="django-actions"><a href="#">+ Add</a> <a href="#">Change</a></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+          <div class="django-sidebar-card">
+            <h3>Recent Actions</h3>
+            <ul style="list-style: none; font-size: 0.85rem; color: #475569; line-height: 1.8;">
+              <li>🔒 Updated <strong>cms-sso</strong> redirect URI</li>
+              <li>🎨 Activated <strong>andai-theme</strong> on all sites</li>
+              <li>👤 Created superuser <strong>admin</strong></li>
+              <li>🏷️ Set PLATFORM_NAME to <strong>AndAI</strong></li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="footer-bottom">
-      <div>&copy; 2026 AndAI. All rights reserved.</div>
-    </div>
-  </footer>
+
+  </div>
+
+  <script>
+    function switchTab(tabKey, btnElement) {
+      // 1. Hide all frames
+      document.querySelectorAll('.portal-frame').forEach(el => el.classList.remove('active'));
+      // 2. Remove active from all buttons
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      
+      // 3. Activate selected frame & button
+      document.getElementById('tab-' + tabKey).classList.add('active');
+      btnElement.classList.add('active');
+    }
+  </script>
 
 </body>
 </html>
