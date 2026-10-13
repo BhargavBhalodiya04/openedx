@@ -2075,7 +2075,7 @@ INSTALLED_APPS = [
 
     # API Documentation
     'drf_spectacular',
-    'drf_spectacular_sidecar',
+    # 'drf_spectacular_sidecar',
 
     # edx-drf-extensions
     'csrf.apps.CsrfAppConfig',  # Enables frontend apps to retrieve CSRF tokens.

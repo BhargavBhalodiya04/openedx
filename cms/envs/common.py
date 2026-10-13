@@ -928,7 +928,7 @@ INSTALLED_APPS = [
 
     # alternative swagger generator for CMS API
     'drf_spectacular',
-    'drf_spectacular_sidecar',
+    # 'drf_spectacular_sidecar',
 
     # Authz
     'openedx.core.djangoapps.authz',
