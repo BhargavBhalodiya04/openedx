@@ -581,10 +581,10 @@ def get_logo_url(is_secure=True):
     if brand_logo_url:
         return brand_logo_url
 
-    return staticfiles_storage.url(default_local_path)
+    return _absolute_url_staticfile(is_secure=is_secure, name=default_local_path)
 
 
-def get_favicon_url():
+def get_favicon_url(is_secure=True):
     """
     Return the url for the branded favicon image to be used.
 
@@ -598,12 +598,12 @@ def get_favicon_url():
     favicon_url_from_site_config = configuration_helpers.get_value('favicon_path')
 
     if favicon_url_from_site_config:
-        return staticfiles_storage.url(favicon_url_from_site_config)
+        return _absolute_url_staticfile(is_secure=is_secure, name=favicon_url_from_site_config)
 
     if brand_favicon_url:
         return brand_favicon_url
 
-    return staticfiles_storage.url(default_local_path)
+    return _absolute_url_staticfile(is_secure=is_secure, name=default_local_path)
 
 
 def get_tos_and_honor_code_url():

@@ -311,6 +311,18 @@ class MFEConfigView(APIView):
         if mfe_name:
             merged_config |= get_mfe_config_overrides().get(mfe_name, {})
 
+        if "LOGO_URL" not in merged_config:
+            from lms.djangoapps.branding import api as branding_api
+            logo_url = branding_api.get_logo_url(is_secure=request.is_secure())
+            if logo_url:
+                merged_config["LOGO_URL"] = logo_url
+
+        if "FAVICON_URL" not in merged_config:
+            from lms.djangoapps.branding import api as branding_api
+            favicon_url = branding_api.get_favicon_url(is_secure=request.is_secure())
+            if favicon_url:
+                merged_config["FAVICON_URL"] = favicon_url
+
         return JsonResponse(merged_config, status=status.HTTP_200_OK)
 
 
@@ -329,7 +341,7 @@ def mfe_name_to_app_id(mfe_name: str) -> str:
     return f"org.openedx.frontend.app.{camel_case}"
 
 
-def translate_legacy_mfe_config() -> dict:
+def translate_legacy_mfe_config(is_secure: bool = False) -> dict:
     """Translate legacy MFE_CONFIG/MFE_CONFIG_OVERRIDES into frontend-base site config format.
 
     This entire function is a compatibility layer that can be removed once legacy
@@ -361,6 +373,20 @@ def translate_legacy_mfe_config() -> dict:
             site_config[SITE_CONFIG_TRANSLATION_MAP[key]] = value
         else:
             common_app_config[key] = value
+
+    if "headerLogoImageUrl" not in site_config:
+        from lms.djangoapps.branding import api as branding_api
+        logo_url = branding_api.get_logo_url(is_secure=is_secure)
+        if logo_url:
+            site_config["headerLogoImageUrl"] = logo_url
+            common_app_config.setdefault("LOGO_URL", logo_url)
+
+    if "FAVICON_URL" not in common_app_config:
+        from lms.djangoapps.branding import api as branding_api
+        favicon_url = branding_api.get_favicon_url(is_secure=is_secure)
+        if favicon_url:
+            common_app_config["FAVICON_URL"] = favicon_url
+            site_config.setdefault("faviconUrl", favicon_url)
 
     site_config["commonAppConfig"] = common_app_config
 
@@ -437,7 +463,7 @@ class FrontendSiteConfigView(APIView):
         ```
         """
         # Legacy translation (removable once MFE_CONFIG is deprecated).
-        site_config = translate_legacy_mfe_config()
+        site_config = translate_legacy_mfe_config(is_secure=request.is_secure())
 
         # FRONTEND_SITE_CONFIG takes highest precedence.  Deep-merge
         # nested keys so that the translated legacy values are extended
