@@ -1,0 +1,446 @@
+# This is a Code Annotations automatically-generated Django model safelist file.
+# These models must be annotated as follows in order to be counted in the coverage report.
+# See https://code-annotations.readthedocs.io/en/latest/safelist.html for more information.
+#
+# fake_app_1.FakeModelName:
+#    ".. no_pii::": "This model has no PII"
+# fake_app_2.FakeModel2:
+#    ".. choice_annotation::": foo, bar, baz
+
+# Via Django
+auth.Group:
+  ".. no_pii:": "No PII"
+auth.Permission:
+  ".. no_pii:": "No PII"
+auth.User:
+  ".. pii:": "Contains username, password, and email address, retired in AccountRetirementView"
+  ".. pii_types:": username, email_address, password
+  ".. pii_retirement:": local_api
+contenttypes.ContentType:
+  ".. no_pii:": "No PII"
+admin.LogEntry:
+  ".. no_pii:": "No PII"
+redirects.Redirect:
+  ".. no_pii:": "No PII"
+sessions.Session:
+  ".. no_pii:": "No PII"
+sites.Site:
+  ".. no_pii:": "No PII"
+
+# Automatically generated edx-platform models that can't be annotated
+calendar_sync.HistoricalUserCalendarSyncConfig:
+  ".. no_pii:": "No PII"
+certificates.HistoricalCertificateAllowlist:
+  ".. no_pii:": "No PII"
+certificates.HistoricalCertificateDateOverride:
+  ".. no_pii:": "No PII"
+certificates.HistoricalCertificateInvalidation:
+  ".. no_pii:": "No PII"
+certificates.HistoricalGeneratedCertificate:
+  ".. pii:": "PII can exist in the generated certificate linked to in this model. Certificate data is currently retained."
+  ".. pii_types:": "name, username"
+  ".. pii_retirement:": "retained"
+course_apps.HistoricalCourseAppStatus:
+  ".. no_pii:": "No PII"
+course_goals.HistoricalCourseGoal:
+  ".. no_pii:": "No PII"
+course_live.HistoricalCourseLiveConfiguration:
+  ".. no_pii:": "No PII"
+course_modes.HistoricalCourseMode:
+  ".. no_pii:": "No PII"
+course_overviews.HistoricalCourseOverview:
+  ".. no_pii:": "No PII"
+discussions.HistoricalDiscussionsConfiguration:
+  ".. no_pii:": "No PII"
+entitlements.HistoricalCourseEntitlement:
+  ".. no_pii:": "No PII"
+entitlements.HistoricalCourseEntitlementSupportDetail:
+  ".. no_pii:": "No PII"
+experiments.HistoricalExperimentKeyValue:
+  ".. no_pii:": "No PII"
+external_user_ids.HistoricalExternalId:
+  ".. no_pii:": "We store external_user_id here, but do not consider that PII under OEP-30."
+external_user_ids.HistoricalExternalIdType:
+  ".. no_pii:": "No PII"
+grades.HistoricalPersistentSubsectionGradeOverride:
+  ".. no_pii:": "No PII"
+instructor_task.HistoricalInstructorTaskSchedule:
+  ".. no_pii:": "No PII"
+program_enrollments.HistoricalProgramCourseEnrollment:
+  ".. no_pii:": "No PII"
+program_enrollments.HistoricalProgramEnrollment:
+  ".. pii:": "PII is found in the external key for a program enrollment"
+  ".. pii_types:": "other"
+  ".. pii_retirement:": "local_api"
+programs.HistoricalProgramDiscussionsConfiguration:
+  ".. no_pii:": "No PII"
+programs.HistoricalProgramLiveConfiguration:
+  ".. no_pii:": "No PII"
+schedules.HistoricalSchedule:
+  ".. no_pii:": "No PII"
+split_modulestore_django.HistoricalSplitModulestoreCourseIndex:
+  ".. no_pii:": "No PII"
+student.HistoricalCourseEnrollment:
+  ".. no_pii:": "No PII"
+student.HistoricalManualEnrollmentAudit:
+  ".. pii:": "Contains enrolled_email, retired in LMSAccountRetirementView"
+  ".. pii_types:": "email_address"
+  ".. pii_retirement:": "local_api"
+
+# Automatically generated models in edx-enterprise that can't be annotated there
+consent.HistoricalDataSharingConsent:
+  ".. pii:": "The username field inherited from Consent contains PII."
+  ".. pii_types:": username
+  ".. pii_retirement:": consumer_api
+degreed.HistoricalDegreedEnterpriseCustomerConfiguration:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnrollmentNotificationEmailTemplate:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCourseEnrollment:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCustomer:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCustomerCatalog:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCustomerEntitlement:
+  ".. no_pii:": "No PII"
+
+# Via edx-celeryutils
+celery_utils.ChordData:
+  ".. no_pii:": "No PII"
+
+# Via django-openid-auth https://github.com/edx/django-openid-auth
+django_openid_auth.Association:
+  ".. no_pii:": "No PII"
+django_openid_auth.Nonce:
+  ".. no_pii:": "No PII"
+django_openid_auth.UserOpenID:
+  ".. pii:": "User OpenID associations. Not used and empty on edx.org, therefore not retired."
+  ".. pii_types:": external_service, password
+  ".. pii_retirement:": retained
+
+# Via django-celery
+djcelery.CrontabSchedule:
+  ".. no_pii:": "No PII"
+djcelery.IntervalSchedule:
+  ".. no_pii:": "No PII"
+djcelery.PeriodicTask:
+  ".. no_pii:": "No PII"
+djcelery.PeriodicTasks:
+  ".. no_pii:": "No PII"
+djcelery.TaskMeta:
+  ".. no_pii:": "No PII"
+djcelery.TaskSetMeta:
+  ".. no_pii:": "No PII"
+djcelery.TaskState:
+  ".. no_pii:": "No PII"
+djcelery.WorkerState:
+  ".. no_pii:": "No PII"
+
+# Via django-celery-results
+django_celery_results.ChordCounter:
+  ".. no_pii:": "No PII"
+django_celery_results.GroupResult:
+  ".. no_pii:": "No PII"
+django_celery_results.TaskResult:
+  ".. no_pii:": "No PII"
+
+# Via edx-oauth2-provider https://github.com/edx/edx-oauth2-provider
+edx_oauth2_provider.TrustedClient:
+  ".. no_pii:": "No PII"
+
+# Via edx-name-affirmation, not part of the openedx org
+edx_name_affirmation.HistoricalVerifiedName:
+  ".. pii:": "Contains name fields."
+  ".. pii_types:": "name"
+  ".. pii_retirement:": "local_api"
+
+# Via PyLTI1p3
+lti1p3_tool_config.LtiTool:
+  ".. no_pii:": "No PII"
+lti1p3_tool_config.LtiToolKey:
+  ".. no_pii:": "No PII"
+
+# Via Django OAuth2 Provider https://github.com/edx/django-oauth2-provider
+oauth2.Client:
+  ".. no_pii:": "No PII"
+oauth2.AccessToken:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+oauth2.Grant:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+oauth2.RefreshToken:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+
+# Via Django OAuth Toolkit https://github.com/evonove/django-oauth-toolkit
+oauth2_provider.AccessToken:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+oauth2_provider.Application:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+oauth2_provider.Grant:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+oauth2_provider.IDToken:
+  ".. pii:": "Contains 3rd party authentication secrets, currently this is retained until the token times out, but should be retired explicitly with the other models from this package."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": retained
+oauth2_provider.RefreshToken:
+  ".. pii:": "Contains 3rd party authentication secrets. Retired in DeactivateLogoutView."
+  ".. pii_types:": password, other
+  ".. pii_retirement:": local_api
+
+# Via Django OAuth Plus https://bitbucket.org/david/django-oauth-plus
+oauth_provider.Consumer:
+  ".. no_pii:": "No PII, unused and empty in edx.org"
+oauth_provider.Nonce:
+  ".. no_pii:": "No PII, unused and empty in edx.org"
+oauth_provider.Scope:
+  ".. no_pii:": "No PII, unused and empty in edx.org"
+oauth_provider.Token:
+  ".. pii:": "User OAuth associations. Not used and empty on edx.org, therefore not retired."
+  ".. pii_types:": external_service, password
+  ".. pii_retirement:": retained
+
+# Via Problem Builder XBlock
+problem_builder.Answer:
+  ".. no_pii:": "No PII"
+problem_builder.Share:
+  ".. no_pii:": "No PII"
+
+# Via Social Django https://github.com/python-social-auth/social-app-django
+social_django.Association:
+  ".. no_pii:": "No PII"
+social_django.Code:
+  ".. pii:": "Transient - email address stored with email authentication code, removed automatically so not retired"
+  ".. pii_types:": email_address
+  ".. pii_retirement:": local_api
+social_django.Nonce:
+  ".. no_pii:": "No PII"
+social_django.Partial:
+  ".. no_pii:": "No PII"
+social_django.UserSocialAuth:
+  ".. pii:": "3rd party authentication data, retired in DeactivateLogoutView"
+  ".. pii_types:": external_service
+  ".. pii_retirement:": local_api
+
+# Via Splash https://github.com/openedx/django-splash
+splash.SplashConfig:
+  ".. no_pii:": "No PII"
+
+# Via sorl-thumbnail https://github.com/jazzband/sorl-thumbnail
+thumbnail.KVStore:
+  ".. no_pii:": "No PII"
+
+# Via waffle
+waffle.Flag:
+  ".. no_pii:": "No PII"
+waffle.Sample:
+  ".. no_pii:": "No PII"
+waffle.Switch:
+  ".. no_pii:": "No PII"
+
+# Additional non-local or generated models requiring safelist coverage
+agreements.HistoricalUserAgreement:
+  ".. no_pii:": "No PII"
+assessment.HistoricalSharedFileUpload:
+  ".. no_pii:": "No PII"
+casbin_adapter.CasbinRule:
+  ".. no_pii:": "No PII"
+channel_integration.ApiResponseRecord:
+  ".. no_pii:": "No PII"
+channel_integration.GenericEnterpriseCustomerPluginConfiguration:
+  ".. no_pii:": "No PII"
+channel_integration.IntegratedChannelAPIRequestLogs:
+  ".. no_pii:": "No PII"
+channel_integration.OrphanedContentTransmissions:
+  ".. no_pii:": "No PII"
+edx_proctoring.HistoricalProctoredExam:
+  ".. no_pii:": "No PII"
+edx_proctoring.HistoricalProctoredExamStudentAttempt:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalDefaultEnterpriseEnrollmentIntention:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalDefaultEnterpriseEnrollmentRealization:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCourseEntitlement:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCustomerInviteKey:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCustomerSsoConfiguration:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseCustomerUser:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseGroup:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalEnterpriseGroupMembership:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalLearnerCreditEnterpriseCourseEnrollment:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalLicensedEnterpriseCourseEnrollment:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalPendingEnrollment:
+  ".. no_pii:": "No PII"
+enterprise.HistoricalPendingEnterpriseCustomerAdminUser:
+  ".. pii:": "Contains pending enterprise admin email address."
+  ".. pii_types:": "email_address"
+  ".. pii_retirement:": "consumer_api"
+enterprise.HistoricalPendingEnterpriseCustomerUser:
+  ".. pii:": "Contains pending enterprise learner email address."
+  ".. pii_types:": "email_address"
+  ".. pii_retirement:": "consumer_api"
+enterprise.HistoricalSystemWideEnterpriseUserRoleAssignment:
+  ".. no_pii:": "No PII"
+forum.AbuseFlagger:
+  ".. no_pii:": "No PII"
+forum.Comment:
+  ".. pii:": "Forum comments may contain user-generated content and usernames."
+  ".. pii_types:": "username, biography"
+  ".. pii_retirement:": "local_api"
+forum.CommentThread:
+  ".. pii:": "Forum thread content may include user-generated text and usernames."
+  ".. pii_types:": "username, biography"
+  ".. pii_retirement:": "local_api"
+forum.CourseStat:
+  ".. no_pii:": "No PII"
+forum.EditHistory:
+  ".. pii:": "Forum edit history stores user-generated text and author identifiers."
+  ".. pii_types:": "username, biography"
+  ".. pii_retirement:": "local_api"
+forum.ForumUser:
+  ".. pii:": "Forum profile links and username data."
+  ".. pii_types:": "username"
+  ".. pii_retirement:": "local_api"
+forum.HistoricalAbuseFlagger:
+  ".. no_pii:": "No PII"
+forum.LastReadTime:
+  ".. no_pii:": "No PII"
+forum.MongoContent:
+  ".. no_pii:": "No PII"
+forum.ReadState:
+  ".. no_pii:": "No PII"
+forum.Subscription:
+  ".. no_pii:": "No PII"
+forum.UserVote:
+  ".. no_pii:": "No PII"
+lti_consumer.Lti1p3Passport:
+  ".. pii:": "Stores third-party LTI service credentials and identifiers."
+  ".. pii_types:": "password, external_service"
+  ".. pii_retirement:": "retained"
+oel_collections.Collection:
+  ".. no_pii:": "No PII"
+oel_components.Component:
+  ".. no_pii:": "No PII"
+oel_publishing.Container:
+  ".. no_pii:": "No PII"
+oel_publishing.DraftChangeLog:
+  ".. no_pii:": "No PII"
+oel_publishing.DraftChangeLogRecord:
+  ".. no_pii:": "No PII"
+oel_publishing.LearningPackage:
+  ".. no_pii:": "No PII"
+oel_publishing.PublishableEntity:
+  ".. no_pii:": "No PII"
+oel_tagging.ObjectTag:
+  ".. no_pii:": "No PII"
+oel_tagging.Tag:
+  ".. no_pii:": "No PII"
+oel_tagging.TagImportTask:
+  ".. no_pii:": "No PII"
+oel_tagging.Taxonomy:
+  ".. no_pii:": "No PII"
+openedx_catalog.CatalogCourse:
+  ".. no_pii:": "No PII"
+openedx_catalog.CourseRun:
+  ".. no_pii:": "No PII"
+openedx_content.Collection:
+  ".. no_pii:": "No PII"
+openedx_content.CollectionPublishableEntity:
+  ".. no_pii:": "No PII"
+openedx_content.Component:
+  ".. no_pii:": "No PII"
+openedx_content.ComponentType:
+  ".. no_pii:": "No PII"
+openedx_content.ComponentVersion:
+  ".. no_pii:": "No PII"
+openedx_content.ComponentVersionMedia:
+  ".. no_pii:": "No PII"
+openedx_content.Container:
+  ".. no_pii:": "No PII"
+openedx_content.ContainerType:
+  ".. no_pii:": "No PII"
+openedx_content.ContainerVersion:
+  ".. no_pii:": "No PII"
+openedx_content.EntityList:
+  ".. no_pii:": "No PII"
+openedx_content.EntityListRow:
+  ".. no_pii:": "No PII"
+openedx_content.LearningPackage:
+  ".. no_pii:": "No PII"
+openedx_content.Media:
+  ".. no_pii:": "No PII"
+openedx_content.MediaType:
+  ".. no_pii:": "No PII"
+openedx_content.PublishLog:
+  ".. no_pii:": "No PII"
+openedx_content.PublishLogRecord:
+  ".. no_pii:": "No PII"
+openedx_content.PublishableEntity:
+  ".. no_pii:": "No PII"
+openedx_content.Published:
+  ".. no_pii:": "No PII"
+openedx_content.Section:
+  ".. no_pii:": "No PII"
+openedx_content.SectionVersion:
+  ".. no_pii:": "No PII"
+openedx_content.Subsection:
+  ".. no_pii:": "No PII"
+openedx_content.SubsectionVersion:
+  ".. no_pii:": "No PII"
+openedx_content.Unit:
+  ".. no_pii:": "No PII"
+openedx_content.UnitVersion:
+  ".. no_pii:": "No PII"
+openedx_learning.HistoricalCompetencyCriteriaGroup:
+  ".. no_pii:": "No PII"
+openedx_learning.HistoricalCompetencyCriterion:
+  ".. no_pii:": "No PII"
+openedx_learning.HistoricalCompetencyRuleProfile:
+  ".. no_pii:": "No PII"
+organizations.HistoricalOrganization:
+  ".. no_pii:": "No PII"
+organizations.HistoricalOrganizationCourse:
+  ".. no_pii:": "No PII"
+push_notifications.APNSDevice:
+  ".. pii:": "Contains mobile push tokens tied to users/devices."
+  ".. pii_types:": "external_service"
+  ".. pii_retirement:": "local_api"
+push_notifications.GCMDevice:
+  ".. pii:": "Contains mobile push tokens tied to users/devices."
+  ".. pii_types:": "external_service"
+  ".. pii_retirement:": "local_api"
+push_notifications.WNSDevice:
+  ".. pii:": "Contains mobile push tokens tied to users/devices."
+  ".. pii_types:": "external_service"
+  ".. pii_retirement:": "local_api"
+push_notifications.WebPushDevice:
+  ".. pii:": "Contains web push endpoint/subscription data tied to users/devices."
+  ".. pii_types:": "external_service"
+  ".. pii_retirement:": "local_api"
+submissions.ExternalGraderDetail:
+  ".. no_pii:": "No PII"
+submissions.SubmissionFile:
+  ".. no_pii:": "No PII"
+support.HistoricalUserSocialAuth:
+  ".. pii:": "Historical social auth linkage to third-party identity providers."
+  ".. pii_types:": "external_service"
+  ".. pii_retirement:": "local_api"

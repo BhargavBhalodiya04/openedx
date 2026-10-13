@@ -1,0 +1,51 @@
+## mako
+
+<%page expression_filter="h" args="online_help_token"/>
+
+<%!
+from django.urls import reverse
+from lms.djangoapps.ccx.overrides import get_current_ccx
+from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
+
+# App that handles subdomain specific branding
+from lms.djangoapps.branding import api as branding_api
+%>
+
+<%
+header_logo = branding_api.get_header_logo(is_secure)
+%>
+
+<h1 class="header-logo">
+  <a href="${header_logo['url']}">
+    ## The navigation_logo block allows comprehensive themes to override the logo.
+    <%block name="navigation_logo">
+      <% header_logo = branding_api.get_header_logo(is_secure) %>
+      <img class="logo" src="${header_logo['image']}" alt="${header_logo['alt']}"/>
+    </%block>
+    % if settings.LOGO_IMAGE_EXTRA_TEXT == 'edge':
+        <span class="font-italic"> | EDGE</span>
+    % endif
+  </a>
+  % if course:
+    <div class="course-header">
+      <span class="provider">${course.display_org_with_default}:</span>
+      <span class="course-number">${course.display_number_with_default}</span>
+      <%
+      display_name = course.display_name_with_default
+      if settings.FEATURES.get('CUSTOM_COURSES_EDX', False):
+        ccx = get_current_ccx(course.id)
+        if ccx:
+          display_name = ccx.display_name
+      %>
+      <span class="course-name">${display_name}</span>
+    </div>
+  % endif
+</h1>
+% if enable_enterprise_sidebar:
+  <div class="enterprise-tagline">
+    <% tagline = configuration_helpers.get_value('ENTERPRISE_TAGLINE', settings.ENTERPRISE_TAGLINE) %>
+    % if tagline:
+      ${tagline}
+    % endif
+  </div>
+% endif

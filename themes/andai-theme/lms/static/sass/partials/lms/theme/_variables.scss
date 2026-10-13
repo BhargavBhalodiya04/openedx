@@ -1,0 +1,17 @@
+// AndAI Theme SASS Overrides
+
+// Brand color palette derived from AndAI mark
+$andai-dark: #1e2632;
+$andai-blue: #1a73e8;
+$andai-light: #f8fafc;
+
+// Map to Bootstrap & Open edX variables
+$primary: $andai-blue;
+$dark: $andai-dark;
+$link-color: $andai-blue;
+
+// Typography
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+// Initialize the Open edX Bootstrap theme
+@import 'edx-bootstrap/sass/open-edx/theme';

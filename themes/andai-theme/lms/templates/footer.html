@@ -1,0 +1,61 @@
+## mako
+<%page expression_filter="h"/>
+<%namespace name='static' file='static_content.html'/>
+<%!
+  from django.urls import reverse
+  from django.utils.translation import gettext as _
+  from django.conf import settings
+  from datetime import datetime
+  import pytz
+  from lms.djangoapps.branding.api import get_footer
+  from openedx.core.djangoapps.lang_pref.api import footer_language_selector_is_enabled
+  from openedx.core.djangolib.markup import HTML, Text
+%>
+<% footer = get_footer(is_secure=is_secure) %>
+
+<div class="container-fluid wrapper-footer" style="background-color: #1e2632; color: #cbd5e1; padding: 40px 20px 20px 20px;">
+  <footer class="container">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <div class="wrapper-logo d-flex align-items-center mb-3">
+          <a href="/" class="d-flex align-items-center text-decoration-none">
+            <img alt="${static.get_platform_name()}" src="${static.url('images/logo.png')}" style="max-height: 44px; width: auto; margin-right: 12px;">
+            <span style="color: #ffffff; font-weight: 700; font-size: 1.3rem; letter-spacing: -0.02em;">${static.get_platform_name()}</span>
+          </a>
+        </div>
+        
+        <p class="copyright mb-2" style="font-size: 0.9rem; color: #94a3b8;">
+          &copy; ${datetime.now(pytz.timezone(settings.TIME_ZONE)).year} ${static.get_platform_name()}. ${_("All rights reserved.")}
+        </p>
+
+        <nav class="navbar legal-nav p-0" aria-label="${_('Legal')}">
+          <ul class="navbar-nav d-flex flex-row flex-wrap" style="gap: 15px; font-size: 0.85rem;">
+            <li class="nav-item">
+              <a class="nav-link p-0" href="/tos" style="color: #94a3b8;">${_("Terms of Service")}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link p-0" href="/privacy" style="color: #94a3b8;">${_("Privacy Policy")}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link p-0" href="/honor" style="color: #94a3b8;">${_("Honor Code")}</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link p-0" href="/contact" style="color: #94a3b8;">${_("Contact Us")}</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+
+      <div class="col-md-4 text-md-right mt-3 mt-md-0">
+        % if context.get('include_language_selector', footer_language_selector_is_enabled()):
+          <div class="language-selector-wrapper mb-2">
+            <%include file="${static.get_template_path('widgets/footer-language-selector.html')}"/>
+          </div>
+        % endif
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">
+          ${_("Powered by Open edX")}
+        </p>
+      </div>
+    </div>
+  </footer>
+</div>

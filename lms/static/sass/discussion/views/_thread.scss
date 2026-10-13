@@ -1,0 +1,308 @@
+// discussion - thread layout
+// ====================
+// NOTE: thread = (post + (responses and comments))
+
+// Table of Contents
+// * +general thread layout
+// * +thread - wrapper styling
+// * +thread - elements - shared styles
+// * +post - individual element styling
+// * +post - answered question - collapsed comment area
+
+// post layout
+.discussion-post {
+  padding: 0 calc(var(--baseline) / 2);
+
+  .post-header-actions {
+    @include float(right);
+  }
+}
+
+// post article
+.discussion-article {
+  .posted-details {
+    @extend %t-copy-sub2;
+    @extend %t-light;
+
+    margin: calc(var(--baseline) / 5) 0;
+    color: var(--forum-color-copy-light);
+
+    .username {
+      @extend %t-strong;
+
+      display: inline;
+    }
+
+    .timeago,
+    .top-post-status {
+      color: inherit;
+    }
+  }
+}
+
+.thread-title {
+  display: block;
+  margin-bottom: var(--baseline);
+  font-size: var(--forum-x-large-font-size);
+  color: theme-color("gray-dark");
+  font-weight: 600;
+}
+
+.thread-responses-wrapper,
+.post-extended-content {
+  padding: 0 calc(var(--baseline) / 2);
+}
+
+// response layout
+.discussion-response {
+  min-height: calc(var(--baseline) * 5);
+
+  .response-header-content {
+    display: inline-block;
+    vertical-align: top;
+    width: flex-grid(11, 12);
+  }
+
+  .response-header-actions {
+    @include float(right);
+    @include right(var(--baseline));
+
+    position: absolute;
+    top: calc(var(--baseline) / 2);
+  }
+
+  // response body
+  .response-body {
+    @extend %t-copy-sub1;
+  }
+}
+
+// comments layout
+.discussion-comment {
+  .response-body {
+    @extend %t-copy-sub2;
+
+    @include padding(calc(var(--baseline) / 2), calc(var(--baseline) * 1.5), 0, 0);
+
+    display: inline-block;
+    margin-top: calc(var(--baseline) / 2);
+    width: flex-grid(10, 12);
+
+    p + p {
+      margin-top: calc(var(--baseline) / 2);
+    }
+  }
+
+  .comment-actions-list {
+    @include float(right);
+    @include right(calc(var(--baseline) / 2));
+
+    position: absolute;
+    top: 0;
+  }
+}
+
+// +thread - wrapper styling
+.thread-wrapper {
+  .response-btn-count-wrapper {
+    margin: var(--baseline) 0;
+  }
+}
+
+// +thread - elements - shared styles
+.discussion-post,
+.discussion-response,
+.discussion-comment {
+  @include clearfix();
+
+  // thread - images
+  .author-image {
+    @include margin-right(calc(var(--baseline) / 2));
+
+    display: inline-block;
+    vertical-align: top;
+
+    // STATE: No profile image
+    &:empty {
+      display: none;
+    }
+
+    // CASE: post image
+    &.level-post {
+      height: var(--post-image-dimension);
+      width: var(--post-image-dimension);
+    }
+
+    // CASE: response image
+    &.level-response {
+      height: var(--response-image-dimension);
+      width: var(--response-image-dimension);
+    }
+
+    // CASE: comment image
+    &.level-comment {
+      height: var(--comment-image-dimension);
+      width: var(--comment-image-dimension);
+    }
+
+    img {
+      border-radius: var(--forum-border-radius);
+    }
+  }
+}
+
+.discussion-response .response-body {
+  @include padding(calc(var(--baseline) / 2), calc(var(--baseline) * 1.5), 0, 0); //ensures content doesn't overlap on post or response actions.
+
+  margin-bottom: 0.2em;
+  font-size: var(--forum-base-font-size);
+}
+
+// +post - individual element styling
+.discussion-post {
+  @include clearfix();
+
+  .post-header-content {
+    max-width: calc(100% - #{var(--actions-dropdown-offset)});
+
+    // post title
+    .post-title {
+      font-size: var(--forum-x-large-font-size);
+      margin-bottom: calc(var(--baseline) / 4);
+    }
+  }
+
+  // post body
+  .post-body {
+    @extend %t-copy-sub1;
+
+    padding: calc(var(--baseline) / 2) 0;
+    max-width: calc(100% - #{var(--actions-dropdown-offset)});
+  }
+
+  // post context
+  .post-context {
+    @extend %t-copy-sub2;
+    @extend %t-light;
+
+    color: var(--forum-color-copy-light);
+
+    // CASE: no courseware context or cohort visibility rules
+    &:empty {
+      display: none;
+    }
+  }
+}
+
+// Styling for discussion threads
+.discussion-thread {
+  padding: 0;
+  margin-bottom: var(--baseline);
+
+  @include transition(all 0.25s linear 0s);
+
+  p {
+    margin-bottom: 0;
+  }
+
+  .discussion-article {
+    @include transition(all 0.2s linear 0s);
+
+    border: 1px solid var(--forum-color-border);
+    border-radius: var(--forum-border-radius);
+    min-height: 0;
+    background: var(--forum-color-background);
+    box-shadow: 0 1px 0 var(--shadow);
+
+    @include transition(all 0.2s linear 0s);
+
+    .thread-wrapper {
+      @include border-radius(var(--forum-border-radius), var(--forum-border-radius), 0, 0);
+
+      position: relative;
+      overflow-x: hidden;
+      overflow-y: auto;
+      max-height: 600px;
+      background-color: var(--forum-color-background);
+
+      .discussion-post {
+        .inline-comment-count {
+          @include margin-right(calc(var(--baseline) / 2));
+
+          @extend %ui-depth2;
+
+          @include float(right);
+
+          position: relative;
+          display: block;
+          height: 27px;
+          margin-top: 6px;
+          padding: 0 8px;
+          border-radius: var(--forum-border-radius);
+          font-size: var(--forum-small-font-size);
+          font-weight: 400;
+          line-height: 25px;
+          color: #888;
+        }
+      }
+
+      .responses {
+        header {
+          padding-bottom: 0;
+          margin-bottom: calc(var(--baseline) * 0.75);
+
+          .posted-by {
+            @include margin-right(calc(var(--baseline) / 4));
+            @include float(left);
+
+            font-size: var(--forum-large-font-size);
+          }
+        }
+      }
+
+      .discussion-reply-new {
+        .wmd-input {
+          height: 120px;
+        }
+      }
+
+      // Content that is hidden by default in the inline view
+      .post-extended-content {
+        display: none;
+      }
+    }
+
+    .post-tools {
+      box-shadow: 0 1px 1px var(--shadow) inset;
+      background: var(--white);
+
+      &:hover {
+        background: var(--forum-color-hover-thread);
+
+        .icon {
+          color: var(--link-hover);
+        }
+      }
+
+      .btn-link {
+        display: block;
+        padding: calc(var(--baseline) * 0.25) var(--baseline);
+        font-size: var(--forum-small-font-size);
+        line-height: 30px;
+
+        .icon {
+          @include margin-right(calc(var(--baseline) * 0.25));
+
+          color: var(--link-color);
+        }
+      }
+    }
+  }
+}
+
+.thread-wrapper,
+.forum-new-post-form {
+  img {
+    max-width: 100%;
+  }
+}

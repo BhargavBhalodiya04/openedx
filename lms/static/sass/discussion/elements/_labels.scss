@@ -1,0 +1,64 @@
+// discussion - elements - labels
+// ====================
+
+.discussion {
+  .post-label {
+    @include margin(calc(var(--baseline)/4), calc(var(--baseline)/2), 0, 0);
+
+    @extend %t-light;
+
+    font-size: var(--forum-small-font-size);
+    display: inline;
+    white-space: nowrap;
+
+    .icon {
+      @include margin-right(calc(var(--baseline) / 5));
+    }
+
+    &.is-hidden {
+      display: none;
+    }
+
+    &.post-label-pinned {
+      color: var(--forum-color-pinned);
+    }
+
+    &.post-label-following {
+      color: var(--forum-color-following);
+    }
+
+    &.post-label-reported {
+      color: var(--forum-color-reported);
+    }
+
+    &.post-label-closed {
+      color: var(--forum-color-closed);
+    }
+
+    &.post-label-by-staff {
+      color: var(--forum-color-staff);
+    }
+
+    &.post-label-by-community-ta {
+      color: var(--forum-color-community-ta);
+    }
+  }
+
+  .user-label-staff,
+  .user-label-community-ta {
+    color: var(--forum-color-copy-light);
+    font-size: var(--forum-small-font-size);
+    white-space: nowrap;
+  }
+}
+
+// Make post labels tighter when shown inside the left nav
+.forum-nav-thread-link {
+  .forum-nav-thread-labels {
+    .post-label {
+      .icon {
+        @include margin-right(0);
+      }
+    }
+  }
+}

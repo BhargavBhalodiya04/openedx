@@ -1,0 +1,852 @@
+"""Tests content_tagging rules-based permissions"""
+
+from unittest.mock import patch
+
+import ddt
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from edx_toggles.toggles.testutils import override_waffle_flag
+from opaque_keys.edx.locator import BlockUsageLocator, CourseLocator, LibraryLocatorV2
+from openedx_authz.constants import permissions as authz_permissions
+from openedx_tagging.models import Tag
+from openedx_tagging.rules import ObjectTagPermissionItem
+
+from common.djangoapps.student.auth import add_users, update_org_role
+from common.djangoapps.student.roles import CourseStaffRole, OrgStaffRole
+from openedx.core.toggles import AUTHZ_COURSE_AUTHORING_FLAG
+
+from .. import api
+from ..rules import can_change_object_tag_objectid, can_remove_object_tag_objectid
+from .test_api import TestTaxonomyMixin
+
+User = get_user_model()
+
+
+@ddt.ddt
+class TestRulesTaxonomy(TestTaxonomyMixin, TestCase):
+    """
+    Tests that the expected rules have been applied to the Taxonomy models.
+
+    We set ENABLE_CREATOR_GROUP for these tests, otherwise all users have course creator access for all orgs.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.superuser = User.objects.create(
+            username="superuser",
+            email="superuser@example.com",
+            is_superuser=True,
+        )
+        self.staff = User.objects.create(
+            username="staff",
+            email="staff@example.com",
+            is_staff=True,
+        )
+
+        # Normal user: grant course creator access to both org1 and org2
+        self.user_both_orgs = User.objects.create(
+            username="user_both_orgs",
+            email="staff+both@example.com",
+        )
+        update_org_role(
+            self.staff,
+            OrgStaffRole,
+            self.user_both_orgs,
+            [self.org1.short_name, self.org2.short_name],
+        )
+
+        # Normal user: grant course creator access to org2
+        self.user_org2 = User.objects.create(
+            username="user_org2",
+            email="staff+org2@example.com",
+        )
+        update_org_role(
+            self.staff, OrgStaffRole, self.user_org2, [self.org2.short_name]
+        )
+
+        # Normal user: no course creator access
+        self.learner = User.objects.create(
+            username="learner",
+            email="learner@example.com",
+        )
+
+        self.course1 = CourseLocator(self.org1.short_name, "DemoX", "Demo_Course")
+        self.course2 = CourseLocator(self.org2.short_name, "DemoX", "Demo_Course")
+        self.courseC = CourseLocator("orgC", "DemoX", "Demo_Course")
+
+        self.xblock1 = BlockUsageLocator(
+            course_key=self.course1,
+            block_type='problem',
+            block_id='block_id'
+        )
+        self.xblock2 = BlockUsageLocator(
+            course_key=self.course2,
+            block_type='problem',
+            block_id='block_id'
+        )
+        self.xblockC = BlockUsageLocator(
+            course_key=self.courseC,
+            block_type='problem',
+            block_id='block_id'
+        )
+
+        add_users(self.staff, CourseStaffRole(self.course1), self.user_both_orgs)
+        add_users(self.staff, CourseStaffRole(self.course2), self.user_both_orgs)
+        add_users(self.staff, CourseStaffRole(self.course2), self.user_org2)
+        add_users(self.staff, CourseStaffRole(self.course2), self.user_org2)
+
+        self.tax_all_course1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_all_orgs,
+            object_id=str(self.course1),
+        )
+        self.tax_all_course2 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_all_orgs,
+            object_id=str(self.course2),
+        )
+        self.tax_all_xblock1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_all_orgs,
+            object_id=str(self.xblock1),
+        )
+        self.tax_all_xblock2 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_all_orgs,
+            object_id=str(self.xblock2),
+        )
+
+        self.tax_both_course1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_both_orgs,
+            object_id=str(self.course1),
+        )
+        self.tax_both_course2 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_both_orgs,
+            object_id=str(self.course2),
+        )
+        self.tax_both_xblock1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_both_orgs,
+            object_id=str(self.xblock1),
+        )
+        self.tax_both_xblock2 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_both_orgs,
+            object_id=str(self.xblock2),
+        )
+
+        self.tax1_course1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_one_org,
+            object_id=str(self.course1),
+        )
+        self.tax1_xblock1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_one_org,
+            object_id=str(self.xblock1),
+        )
+
+        self.tax_no_org_course1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_no_orgs,
+            object_id=str(self.course1),
+        )
+
+        self.tax_no_org_xblock1 = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_no_orgs,
+            object_id=str(self.xblock1),
+        )
+
+        self.disabled_course2_tag_perm = ObjectTagPermissionItem(
+            taxonomy=self.taxonomy_disabled,
+            object_id=str(self.course2),
+        )
+
+        self.all_org_perms = (
+            self.tax_all_course1,
+            self.tax_all_course2,
+            self.tax_all_xblock1,
+            self.tax_all_xblock2,
+            self.tax_both_course1,
+            self.tax_both_course2,
+            self.tax_both_xblock1,
+            self.tax_both_xblock2,
+        )
+
+    def _expected_users_have_perm(
+        self, perm, obj, learner_perm=False, learner_obj=False, user_org2=True
+    ):
+        """
+        Checks that all users have the given permission on the given object.
+
+        If learners_too, then the learner user should have it too.
+        """
+        # Global Taxonomy Admins can do pretty much anything
+        assert self.superuser.has_perm(perm)
+        assert self.superuser.has_perm(perm, obj)
+        assert self.staff.has_perm(perm)
+        assert self.staff.has_perm(perm, obj)
+
+        # Org content creators are bound by a taxonomy's org restrictions
+        assert self.user_both_orgs.has_perm(perm) == learner_perm
+        assert self.user_both_orgs.has_perm(perm, obj)
+        assert self.user_org2.has_perm(perm) == learner_perm
+        # user_org2 does not have course creator access for org 1
+        assert self.user_org2.has_perm(perm, obj) == user_org2
+
+        # Learners can't do much but view
+        assert self.learner.has_perm(perm) == learner_perm
+        assert self.learner.has_perm(perm, obj) == learner_obj
+
+    # Taxonomy
+    def test_taxonomy_base_add_permissions(self):
+        """
+        Test that staff, superuser and org admins can call POST on taxonomies.
+        """
+        perm = "oel_tagging.add_taxonomy"
+        assert self.superuser.has_perm(perm)
+        assert self.staff.has_perm(perm)
+        assert self.user_both_orgs.has_perm(perm)
+        assert self.user_org2.has_perm(perm)
+        assert not self.learner.has_perm(perm)
+
+    @ddt.data(
+        "oel_tagging.change_taxonomy",
+        "oel_tagging.delete_taxonomy",
+    )
+    def test_taxonomy_base_edit_permissions(self, perm):
+        """
+        Test that everyone can call PUT, PATCH and DELETE on taxonomies.
+        """
+        assert self.superuser.has_perm(perm)
+        assert self.staff.has_perm(perm)
+        assert self.user_both_orgs.has_perm(perm)
+        assert self.user_org2.has_perm(perm)
+        assert self.learner.has_perm(perm)
+
+    @ddt.data(
+        "oel_tagging.view_taxonomy",
+    )
+    def test_taxonomy_base_view_permissions(self, perm):
+        """
+        Test that everyone can call GET on taxonomies.
+        """
+        assert self.superuser.has_perm(perm)
+        assert self.staff.has_perm(perm)
+        assert self.user_both_orgs.has_perm(perm)
+        assert self.user_org2.has_perm(perm)
+        assert self.learner.has_perm(perm)
+
+    @ddt.data(
+        ("oel_tagging.change_taxonomy", "taxonomy_disabled"),
+        ("oel_tagging.change_taxonomy", "taxonomy_both_orgs"),
+        ("oel_tagging.change_taxonomy", "taxonomy_one_org"),
+        ("oel_tagging.delete_taxonomy", "taxonomy_disabled"),
+        ("oel_tagging.delete_taxonomy", "taxonomy_both_orgs"),
+        ("oel_tagging.delete_taxonomy", "taxonomy_one_org"),
+    )
+    @ddt.unpack
+    def test_change_taxonomy(self, perm, taxonomy_attr):
+        """
+        Test that only instance level and org level admins can edit/delete taxonomies from their orgs.
+        """
+        taxonomy = getattr(self, taxonomy_attr)
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert self.user_both_orgs.has_perm(perm, taxonomy)
+        assert self.user_org2.has_perm(perm, taxonomy) == (taxonomy_attr != "taxonomy_one_org")
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    @ddt.data(
+        ("oel_tagging.change_taxonomy", "taxonomy_all_orgs"),
+        ("oel_tagging.change_taxonomy", "taxonomy_no_orgs"),
+        ("oel_tagging.delete_taxonomy", "taxonomy_all_orgs"),
+        ("oel_tagging.delete_taxonomy", "taxonomy_no_orgs"),
+    )
+    @ddt.unpack
+    def test_change_taxonomy_all_no_org(self, perm, taxonomy_attr):
+        """
+        Test that only Staff & Superuser can edit/delete taxonomies from all or no org.
+        """
+        taxonomy = getattr(self, taxonomy_attr)
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert not self.user_both_orgs.has_perm(perm, taxonomy)
+        assert not self.user_org2.has_perm(perm, taxonomy)
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    def test_view_taxonomy_no_orgs(self):
+        """
+        Test that only Staff & Superuser can view taxonomies with no orgs.
+        """
+        taxonomy = self.taxonomy_no_orgs
+        taxonomy.enabled = True
+        perm = "oel_tagging.view_taxonomy"
+
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert not self.user_both_orgs.has_perm(perm, taxonomy)
+        assert not self.user_org2.has_perm(perm, taxonomy)
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    @ddt.data(
+        "taxonomy_both_orgs",
+        "taxonomy_one_org",
+    )
+    def test_view_taxonomy_enabled(self, taxonomy_attr):
+        """
+        Test that anyone can view enabled taxonomies from their org.
+        """
+        taxonomy = getattr(self, taxonomy_attr)
+        taxonomy.enabled = True
+        perm = "oel_tagging.view_taxonomy"
+
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert self.user_both_orgs.has_perm(perm, taxonomy)
+        assert self.user_org2.has_perm(perm, taxonomy) == (taxonomy_attr != "taxonomy_one_org")
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    def test_view_taxonomy_enabled_all_orgs(self):
+        """
+        Test that anyone can view enabled global taxonomies.
+        """
+        taxonomy = self.taxonomy_all_orgs
+        taxonomy.enabled = True
+        perm = "oel_tagging.view_taxonomy"
+
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert self.user_both_orgs.has_perm(perm, taxonomy)
+        assert self.user_org2.has_perm(perm, taxonomy)
+        assert self.learner.has_perm(perm, taxonomy)
+
+    @ddt.data(
+        "taxonomy_both_orgs",
+        "taxonomy_one_org",
+    )
+    def test_view_taxonomy_disabled(self, taxonomy_attr):
+        """
+        Test that only instance level and org level admins can view disabled taxonomies.
+        """
+        taxonomy = getattr(self, taxonomy_attr)
+        taxonomy.enabled = False
+        perm = "oel_tagging.view_taxonomy"
+
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert self.user_both_orgs.has_perm(perm, taxonomy)
+        assert self.user_org2.has_perm(perm, taxonomy) == (taxonomy_attr != "taxonomy_one_org")
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    def test_view_taxonomy_all_orgs_disabled(self):
+        """
+        Test that only instance level admins can view disabled all org taxonomies.
+        """
+        taxonomy = self.taxonomy_all_orgs
+        taxonomy.enabled = False
+        perm = "oel_tagging.view_taxonomy"
+
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert not self.user_both_orgs.has_perm(perm, taxonomy)
+        assert not self.user_org2.has_perm(perm, taxonomy)
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    def test_view_taxonomy_disabled_no_org(self):
+        """
+        Test that only Staff & Superuser can view disabled taxonomies with no orgs.
+        """
+        taxonomy = self.taxonomy_no_orgs
+        taxonomy.enabled = False
+        perm = "oel_tagging.view_taxonomy"
+
+        assert self.superuser.has_perm(perm, taxonomy)
+        assert self.staff.has_perm(perm, taxonomy)
+        assert not self.user_both_orgs.has_perm(perm, taxonomy)
+        assert not self.user_org2.has_perm(perm, taxonomy)
+        assert not self.learner.has_perm(perm, taxonomy)
+
+    # Tag
+
+    @ddt.data(
+        "oel_tagging.add_tag",
+        "oel_tagging.change_tag",
+        "oel_tagging.delete_tag",
+    )
+    def test_tag_base_edit_permissions(self, perm):
+        """
+        Test that only Staff & Superuser can call add/edit/delete tags in an
+        "all orgs" taxonomy.
+        """
+        tag = Tag(taxonomy=self.taxonomy_all_orgs)
+        assert self.superuser.has_perm(perm, tag)
+        assert self.staff.has_perm(perm, tag)
+        assert not self.user_both_orgs.has_perm(perm, tag)
+        assert not self.user_org2.has_perm(perm, tag)
+        assert not self.learner.has_perm(perm, tag)
+
+    def test_tag_base_view_permissions(self):
+        """
+        Test that everyone can call view tag.
+        """
+        perm = "oel_tagging.view_tag"
+        assert self.superuser.has_perm(perm)
+        assert self.staff.has_perm(perm)
+        assert self.user_both_orgs.has_perm(perm)
+        assert self.user_org2.has_perm(perm)
+        assert self.learner.has_perm(perm)
+
+    @ddt.data(
+        ("oel_tagging.change_tag", "tag_all_orgs"),
+        ("oel_tagging.change_tag", "tag_disabled"),
+        ("oel_tagging.change_tag", "tag_both_orgs"),
+        ("oel_tagging.change_tag", "tag_one_org"),
+        ("oel_tagging.change_tag", "tag_no_orgs"),
+        ("oel_tagging.delete_tag", "tag_all_orgs"),
+        ("oel_tagging.delete_tag", "tag_disabled"),
+        ("oel_tagging.delete_tag", "tag_both_orgs"),
+        ("oel_tagging.delete_tag", "tag_one_org"),
+        ("oel_tagging.delete_tag", "tag_no_orgs"),
+    )
+    @ddt.unpack
+    def test_change_tag(self, perm, tag_attr):
+        """
+        Test that only Staff & Superuser can edit/delete taxonomies.
+        """
+        tag = getattr(self, tag_attr)
+        assert self.superuser.has_perm(perm, tag)
+        assert self.staff.has_perm(perm, tag)
+        assert not self.user_both_orgs.has_perm(perm, tag)
+        assert not self.user_org2.has_perm(perm, tag)
+        assert not self.learner.has_perm(perm, tag)
+
+    @ddt.data(
+        "oel_tagging.add_tag",
+        "oel_tagging.change_tag",
+        "oel_tagging.delete_tag",
+    )
+    def test_system_taxonomy_tag(self, perm):
+        """
+        Test that even taxonomy administrators cannot add/edit/delete tags on read-only taxonomies.
+        """
+        ro_taxonomy = api.create_taxonomy(
+            name="System Languages",
+        )
+        ro_taxonomy.read_only = True
+        ro_taxonomy.save()
+        dummy_tag = Tag(taxonomy=ro_taxonomy, value="en")  # Not saved
+
+        assert self.superuser.has_perm(perm, dummy_tag)
+        assert not self.staff.has_perm(perm, dummy_tag)
+        assert not self.user_both_orgs.has_perm(perm, dummy_tag)
+        assert not self.user_org2.has_perm(perm, dummy_tag)
+        assert not self.learner.has_perm(perm, dummy_tag)
+
+    @ddt.data(
+        "oel_tagging.change_tag",
+        "oel_tagging.delete_tag",
+    )
+    def test_free_text_taxonomy_tag(self, perm):
+        """
+        Test that even taxonomy administrators cannot edit/delete tags on free text taxonomies.
+        """
+        free_text_taxonomy = api.create_taxonomy(
+            name="Free text",
+            allow_free_text=True,
+        )
+
+        tag_free_text_taxonomy = Tag.objects.create(
+            taxonomy=free_text_taxonomy,
+            value="value1",
+        )
+
+        assert self.superuser.has_perm(perm, tag_free_text_taxonomy)
+        assert not self.staff.has_perm(perm, tag_free_text_taxonomy)
+        assert not self.user_both_orgs.has_perm(perm, tag_free_text_taxonomy)
+        assert not self.user_org2.has_perm(perm, tag_free_text_taxonomy)
+        assert not self.learner.has_perm(perm, tag_free_text_taxonomy)
+
+    @ddt.data(
+        "oel_tagging.change_tag",
+        "oel_tagging.delete_tag",
+    )
+    def test_tag_no_taxonomy(self, perm):
+        """A "floating" tag with no taxonomy cannot be edited. This shouldn't really happen"""
+        tag = Tag()
+
+        # superusers cannot be prevented from doing anything - their permissions check short-circuits our logic.
+        assert self.superuser.has_perm(perm, tag)
+
+        # Everyone else can't do anything
+        assert not self.staff.has_perm(perm, tag)
+        assert not self.user_both_orgs.has_perm(perm, tag)
+        assert not self.user_org2.has_perm(perm, tag)
+        assert not self.learner.has_perm(perm, tag)
+
+    @ddt.data(
+        "tag_all_orgs",
+        "tag_both_orgs",
+        "tag_one_org",
+        "tag_disabled",
+        "tag_no_orgs",
+    )
+    def test_view_tag(self, tag_attr):
+        """Anyone can view any Tag"""
+        tag = getattr(self, tag_attr)
+        self._expected_users_have_perm(
+            "oel_tagging.view_tag", tag, learner_perm=True, learner_obj=True
+        )
+
+    # ObjectTag
+
+    @ddt.data(
+        ("oel_tagging.add_objecttag", "disabled_course2_tag_perm"),
+        ("oel_tagging.change_objecttag", "disabled_course2_tag_perm"),
+        ("oel_tagging.delete_objecttag", "disabled_course2_tag_perm"),
+    )
+    @ddt.unpack
+    def test_object_tag_disabled_taxonomy(self, perm, tag_attr):
+        """
+        Only superuser create/edit an ObjectTag using a disabled Taxonomy
+        """
+        object_tag_perm = getattr(self, tag_attr)
+        assert self.superuser.has_perm(perm, object_tag_perm)
+        assert not self.staff.has_perm(perm, object_tag_perm)
+        assert not self.user_both_orgs.has_perm(perm, object_tag_perm)
+        assert not self.user_org2.has_perm(perm, object_tag_perm)
+        assert not self.learner.has_perm(perm, object_tag_perm)
+
+    @ddt.data(
+        ("oel_tagging.add_objecttag", "tax_no_org_course1"),
+        ("oel_tagging.add_objecttag", "tax_no_org_xblock1"),
+        ("oel_tagging.change_objecttag", "tax_no_org_course1"),
+        ("oel_tagging.change_objecttag", "tax_no_org_xblock1"),
+        ("oel_tagging.delete_objecttag", "tax_no_org_xblock1"),
+        ("oel_tagging.delete_objecttag", "tax_no_org_course1"),
+    )
+    @ddt.unpack
+    def test_object_tag_no_orgs(self, perm, tag_attr):
+        """Only superusers can create/edit an ObjectTag with a no-org Taxonomy"""
+        object_tag = getattr(self, tag_attr)
+        assert self.superuser.has_perm(perm, object_tag)
+        assert not self.staff.has_perm(perm, object_tag)
+        assert not self.user_both_orgs.has_perm(perm, object_tag)
+        assert not self.user_org2.has_perm(perm, object_tag)
+        assert not self.learner.has_perm(perm, object_tag)
+
+    @ddt.data(
+        "oel_tagging.add_objecttag",
+        "oel_tagging.change_objecttag",
+        "oel_tagging.delete_objecttag",
+        "oel_tagging.can_tag_object",
+    )
+    def test_change_object_tag_all_orgs(self, perm):
+        """
+        Taxonomy administrators and org authors can create/edit an ObjectTag using taxonomies in their org,
+        but only on objects they have write access to.
+        """
+        for perm_item in self.all_org_perms:
+            assert self.superuser.has_perm(perm, perm_item)
+            assert self.staff.has_perm(perm, perm_item)
+            assert self.user_both_orgs.has_perm(perm, perm_item)
+            assert self.user_org2.has_perm(perm, perm_item) == (self.org2.short_name in perm_item.object_id)
+            assert not self.learner.has_perm(perm, perm_item)
+
+    @ddt.data(
+        ("oel_tagging.add_objecttag", "tax1_course1"),
+        ("oel_tagging.add_objecttag", "tax1_xblock1"),
+        ("oel_tagging.change_objecttag", "tax1_course1"),
+        ("oel_tagging.change_objecttag", "tax1_xblock1"),
+        ("oel_tagging.delete_objecttag", "tax1_course1"),
+        ("oel_tagging.delete_objecttag", "tax1_xblock1"),
+    )
+    @ddt.unpack
+    def test_change_object_tag_org1(self, perm, tag_attr):
+        """Taxonomy administrators can create/edit an ObjectTag on taxonomies in their org."""
+        perm_item = getattr(self, tag_attr)
+        assert self.superuser.has_perm(perm, perm_item)
+        assert self.staff.has_perm(perm, perm_item)
+        assert self.user_both_orgs.has_perm(perm, perm_item)
+        assert not self.user_org2.has_perm(perm, perm_item)
+        assert not self.learner.has_perm(perm, perm_item)
+
+    @ddt.data(
+        "tax_all_course1",
+        "tax_all_course2",
+        "tax_all_xblock1",
+        "tax_all_xblock2",
+        "tax_both_course1",
+        "tax_both_course2",
+        "tax_both_xblock1",
+        "tax_both_xblock2",
+    )
+    def test_view_object_tag(self, tag_attr):
+        """Content authors can view ObjectTags associated with enabled taxonomies in their org."""
+        perm = "oel_tagging.view_objecttag"
+        perm_item = getattr(self, tag_attr)
+        assert self.superuser.has_perm(perm, perm_item)
+        assert self.staff.has_perm(perm, perm_item)
+        assert self.user_both_orgs.has_perm(perm, perm_item)
+        assert self.user_org2.has_perm(perm, perm_item) == tag_attr.endswith("2")
+        assert not self.learner.has_perm(perm, perm_item)
+
+    def test_view_object_tag_diabled(self):
+        """
+        Nobody can view a ObjectTag from a disabled taxonomy
+        """
+        perm = "oel_tagging.view_objecttag"
+        assert self.superuser.has_perm(perm, self.disabled_course_tag)
+        assert not self.staff.has_perm(perm, self.disabled_course_tag)
+        assert not self.user_both_orgs.has_perm(perm, self.disabled_course_tag)
+        assert not self.user_org2.has_perm(perm, self.disabled_course_tag)
+        assert not self.learner.has_perm(perm, self.disabled_course_tag)
+
+
+class TestRulesLibraryV2Permissions(TestTaxonomyMixin, TestCase):
+    """
+    Tests for Content Library V2 permissions with MANAGE_LIBRARY_TAGS.
+    """
+
+    def setUp(self):
+        super().setUp()
+
+        self.library_user = User.objects.create(
+            username="library_user",
+            email="library_user@example.com",
+        )
+        self.org_admin = User.objects.create(
+            username="org_admin",
+            email="org_admin@example.com",
+        )
+        self.regular_user = User.objects.create(
+            username="regular_user",
+            email="regular_user@example.com",
+        )
+        self.superuser = User.objects.create(
+            username="superuser",
+            email="superuser@example.com",
+            is_superuser=True,
+        )
+
+        # Make org_admin an OrgStaffRole for org1
+        update_org_role(
+            self.superuser,
+            OrgStaffRole,
+            self.org_admin,
+            [self.org1.short_name],
+        )
+
+        self.library_key = LibraryLocatorV2.from_string(f"lib:{self.org1.short_name}:test_library")
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_change_objecttag_objectid_with_manage_library_tags_permission(self, mock_is_user_allowed):
+        """
+        Test that a user with MANAGE_LIBRARY_TAGS permission can change tags on a library.
+        """
+        mock_is_user_allowed.return_value = True
+
+        result = can_change_object_tag_objectid(self.library_user, str(self.library_key))
+
+        self.assertTrue(result)  # noqa: PT009
+        mock_is_user_allowed.assert_called_once_with(
+            self.library_user.username,
+            authz_permissions.MANAGE_LIBRARY_TAGS.identifier,
+            str(self.library_key),
+        )
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_change_objecttag_objectid_without_manage_library_tags_but_org_admin(self, mock_is_user_allowed):
+        """
+        Test that an org admin can change tags on a library even without
+        explicit MANAGE_LIBRARY_TAGS permission.
+        """
+        mock_is_user_allowed.return_value = False
+
+        result = can_change_object_tag_objectid(self.org_admin, str(self.library_key))
+
+        self.assertTrue(result)  # noqa: PT009
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_change_objecttag_objectid_without_permissions(self, mock_is_user_allowed):
+        """
+        Test that a regular user without MANAGE_LIBRARY_TAGS permission and
+        without org admin access cannot change tags.
+        """
+        mock_is_user_allowed.return_value = False
+
+        result = can_change_object_tag_objectid(self.regular_user, str(self.library_key))
+
+        self.assertFalse(result)  # noqa: PT009
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_remove_objecttag_objectid_with_manage_library_tags_permission(self, mock_is_user_allowed):
+        """
+        Test that a user with MANAGE_LIBRARY_TAGS permission can remove tags
+        from a library.
+        """
+        mock_is_user_allowed.return_value = True
+
+        result = can_remove_object_tag_objectid(self.library_user, str(self.library_key))
+
+        self.assertTrue(result)  # noqa: PT009
+        mock_is_user_allowed.assert_called_once_with(
+            self.library_user.username,
+            authz_permissions.MANAGE_LIBRARY_TAGS.identifier,
+            str(self.library_key),
+        )
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_remove_objecttag_objectid_without_manage_library_tags_but_org_admin(self, mock_is_user_allowed):
+        """
+        Test that an org admin can remove tags from a library even without
+        explicit MANAGE_LIBRARY_TAGS permission.
+        """
+        mock_is_user_allowed.return_value = False
+
+        result = can_remove_object_tag_objectid(self.org_admin, str(self.library_key))
+
+        self.assertTrue(result)  # noqa: PT009
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_remove_objecttag_objectid_without_permissions(self, mock_is_user_allowed):
+        """
+        Test that a regular user without MANAGE_LIBRARY_TAGS permission and
+        without org admin access cannot remove tags.
+        """
+        mock_is_user_allowed.return_value = False
+
+        result = can_remove_object_tag_objectid(self.regular_user, str(self.library_key))
+
+        self.assertFalse(result)  # noqa: PT009
+
+    def test_invalid_library_key(self):
+        """
+        Test that invalid library keys return False.
+        """
+        self.assertFalse(can_change_object_tag_objectid(self.library_user, "invalid_key"))  # noqa: PT009
+        self.assertFalse(can_remove_object_tag_objectid(self.library_user, "invalid_key"))  # noqa: PT009
+
+    def test_empty_object_id(self):
+        """
+        Test behavior with empty object_id.
+        """
+        self.assertTrue(can_change_object_tag_objectid(self.library_user, ""))  # noqa: PT009
+
+        with self.assertRaises(ValueError):  # noqa: PT027
+            can_remove_object_tag_objectid(self.library_user, "")
+
+
+class TestRulesCourseAuthzPermissions(TestTaxonomyMixin, TestCase):
+    """
+    Tests for can_change_object_tag_objectid's course-authz-aware branch.
+    """
+
+    def setUp(self):
+        super().setUp()
+
+        self.superuser = User.objects.create(
+            username="superuser",
+            email="superuser@example.com",
+            is_superuser=True,
+        )
+        self.authz_user = User.objects.create(
+            username="authz_user",
+            email="authz_user@example.com",
+        )
+        self.legacy_user = User.objects.create(
+            username="legacy_user",
+            email="legacy_user@example.com",
+        )
+        self.org_admin_user = User.objects.create(
+            username="org_admin_user",
+            email="org_admin_user@example.com",
+        )
+
+        self.course_key = CourseLocator.from_string("course-v1:OeX+DemoX+Demo_Course")
+        self.xblock_key = BlockUsageLocator(
+            course_key=self.course_key,
+            block_type='problem',
+            block_id='block_id',
+        )
+        # Granted while the waffle flag is off, so this goes through the legacy role path.
+        add_users(self.superuser, CourseStaffRole(self.course_key), self.legacy_user)
+        # org1's short_name ("OeX") matches self.course_key's org, so this is an org-level
+        # admin for the course's org, not merely a course-level role.
+        update_org_role(self.superuser, OrgStaffRole, self.org_admin_user, [self.org1.short_name])
+
+    @override_waffle_flag(AUTHZ_COURSE_AUTHORING_FLAG, active=True)
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_course_switched_authz_only_role_allowed(self, mock_is_user_allowed):
+        """
+        A course switched to openedx-authz grants access via authz_api.is_user_allowed alone.
+        """
+        mock_is_user_allowed.return_value = True
+
+        result = can_change_object_tag_objectid(self.authz_user, str(self.course_key))
+
+        self.assertTrue(result)  # noqa: PT009
+        mock_is_user_allowed.assert_called_once_with(
+            self.authz_user.username,
+            authz_permissions.COURSES_MANAGE_TAGS.identifier,
+            str(self.course_key),
+        )
+
+    @override_waffle_flag(AUTHZ_COURSE_AUTHORING_FLAG, active=True)
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_course_switched_legacy_only_role_denied(self, mock_is_user_allowed):
+        """
+        A switched course does not fall back to a legacy role: the switch is exclusive, not
+        an OR with the legacy check.
+        """
+        mock_is_user_allowed.return_value = False
+
+        result = can_change_object_tag_objectid(self.legacy_user, str(self.course_key))
+
+        self.assertFalse(result)  # noqa: PT009
+        mock_is_user_allowed.assert_called_once_with(
+            self.legacy_user.username,
+            authz_permissions.COURSES_MANAGE_TAGS.identifier,
+            str(self.course_key),
+        )
+
+    @override_waffle_flag(AUTHZ_COURSE_AUTHORING_FLAG, active=True)
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_xblock_in_switched_course_authz_only_role_allowed(self, mock_is_user_allowed):
+        """
+        An xblock inside a switched course resolves through the same authz-only branch as
+        the course itself: should_use_course_authz_for_object resolves the xblock's usage
+        key down to its course key.
+        """
+        mock_is_user_allowed.return_value = True
+
+        result = can_change_object_tag_objectid(self.authz_user, str(self.xblock_key))
+
+        self.assertTrue(result)  # noqa: PT009
+        mock_is_user_allowed.assert_called_once_with(
+            self.authz_user.username,
+            authz_permissions.COURSES_MANAGE_TAGS.identifier,
+            str(self.course_key),
+        )
+
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_course_not_switched_legacy_role_allowed(self, mock_is_user_allowed):
+        """
+        A course that hasn't been switched to openedx-authz keeps resolving through the
+        legacy role check, unaffected by this change.
+        """
+        result = can_change_object_tag_objectid(self.legacy_user, str(self.course_key))
+
+        self.assertTrue(result)  # noqa: PT009
+        mock_is_user_allowed.assert_not_called()
+
+    @override_waffle_flag(AUTHZ_COURSE_AUTHORING_FLAG, active=True)
+    @patch("openedx_authz.api.is_user_allowed")
+    def test_library_object_unchanged(self, mock_is_user_allowed):
+        """
+        Library objects are unaffected by this branch: should_use_course_authz_for_object
+        only recognizes CourseKeys, so the library check still resolves through
+        MANAGE_LIBRARY_TAGS even with the course-authz flag on.
+        """
+        mock_is_user_allowed.return_value = True
+        library_key = LibraryLocatorV2.from_string(f"lib:{self.org1.short_name}:test_library")
+
+        result = can_change_object_tag_objectid(self.legacy_user, str(library_key))
+
+        self.assertTrue(result)  # noqa: PT009
+        mock_is_user_allowed.assert_called_once_with(
+            self.legacy_user.username,
+            authz_permissions.MANAGE_LIBRARY_TAGS.identifier,
+            str(library_key),
+        )

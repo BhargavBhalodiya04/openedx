@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AndAI Platform - Rebranding Preview</title>
+  <link rel="icon" type="image/x-icon" href="lms/static/images/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --andai-dark: #1e2632;
+      --andai-blue: #1a73e8;
+      --andai-bg: #f8fafc;
+      --andai-card-bg: #ffffff;
+      --andai-border: #e2e8f0;
+      --andai-text-main: #0f172a;
+      --andai-text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--andai-bg);
+      color: var(--andai-text-main);
+      line-height: 1.5;
+    }
+
+    .badge-banner {
+      background: linear-gradient(135deg, #1e2632 0%, #0f172a 100%);
+      color: #94a3b8;
+      padding: 12px 24px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .badge-banner span {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge-banner .tag {
+      background-color: var(--andai-blue);
+      color: white;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+
+    /* LMS Header */
+    .preview-header {
+      background-color: #ffffff;
+      border-bottom: 1px solid var(--andai-border);
+      padding: 12px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo {
+      height: 48px;
+      width: 48px;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--andai-dark);
+      letter-spacing: -0.03em;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--andai-text-main);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--andai-blue);
+    }
+
+    .btn-primary {
+      background-color: var(--andai-blue);
+      color: white !important;
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 24px;
+    }
+
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--andai-dark);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .card {
+      background: var(--andai-card-bg);
+      border: 1px solid var(--andai-border);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--andai-dark);
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      color: var(--andai-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    .asset-showcase {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f5f9;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .asset-showcase.dark-bg {
+      background-color: var(--andai-dark);
+    }
+
+    /* Studio Header Preview */
+    .studio-preview {
+      background-color: #273142;
+      border-radius: 8px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    .studio-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .studio-brand span {
+      font-weight: 700;
+      font-size: 1.2rem;
+    }
+
+    /* LMS Footer */
+    .preview-footer {
+      background-color: var(--andai-dark);
+      color: #94a3b8;
+      padding: 48px 32px 24px 32px;
+      margin-top: 60px;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 32px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .footer-brand span {
+      color: white;
+      font-weight: 800;
+      font-size: 1.3rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+      margin-top: 12px;
+    }
+
+    .footer-links a {
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 0.85rem;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 32px auto 0 auto;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Notification Bar -->
+  <div class="badge-banner">
+    <span><span class="tag">ACTIVE THEME</span> Open edX Rebranding Theme: <strong>andai-theme</strong></span>
+    <span>Source Logo: <code>C:\AndAI\mediamodifier_cropped_image 1.png</code></span>
+  </div>
+
+  <!-- 1. LMS Live Header Preview -->
+  <header class="preview-header">
+    <a href="#" class="brand-group">
+      <img src="lms/static/images/logo.png" alt="AndAI Logo" class="brand-logo">
+      <span class="brand-name">AndAI</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Explore Courses</a></li>
+      <li><a href="#">Programs & Degrees</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Sign In</a></li>
+      <li><a href="#" class="btn-primary">Register Free</a></li>
+    </ul>
+  </header>
+
+  <main class="container">
+    <h2 class="section-title">🎨 Brand Asset Deployment Status</h2>
+    <div class="grid-cards">
+      <!-- Card 1 -->
+      <div class="card">
+        <h3>LMS Navbar Brand Logo</h3>
+        <p>Used in <code>lms/templates/header/brand.html</code> and mobile responsive views.</p>
+        <div class="asset-showcase">
+          <img src="lms/static/images/logo.png" alt="AndAI Logo" style="height: 64px;">
+        </div>
+        <p><strong>Path:</strong> <code>themes/andai-theme/lms/static/images/logo.png</code></p>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="card">
+        <h3>High-DPI / Large Brand Logo</h3>
+        <p>Used on splash pages, hero cards, and certificate verifications.</p>
+        <div class="asset-showcase dark-bg">
+          <img src="lms/static/images/logo-large.png" alt="AndAI Large Logo" style="height: 64px;">
+        </div>
+        <p><strong>Path:</strong> <code>themes/andai-theme/lms/static/images/logo-large.png</code></p>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="card">
+        <h3>Studio (CMS) Brand Bar</h3>
+        <p>Used in <code>cms/templates/widgets/header.html</code> for authoring courses.</p>
+        <div class="studio-preview">
+          <div class="studio-brand">
+            <img src="cms/static/images/studio-logo.png" alt="AndAI Studio Logo" style="height: 36px;">
+            <span>AndAI Studio</span>
+          </div>
+          <div style="font-size: 0.85rem; color: #94a3b8;">Staff Course Tools</div>
+        </div>
+        <p style="margin-top: 16px;"><strong>Path:</strong> <code>themes/andai-theme/cms/static/images/studio-logo.png</code></p>
+      </div>
+    </div>
+
+    <h2 class="section-title">⚙️ Django Configuration Status</h2>
+    <div class="card">
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+        <tr style="border-bottom: 1px solid var(--andai-border);">
+          <th style="text-align: left; padding: 10px 0;">Setting Variable</th>
+          <th style="text-align: left; padding: 10px 0;">Configured Value</th>
+          <th style="text-align: left; padding: 10px 0;">Configuration File</th>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--andai-border);">
+          <td style="padding: 10px 0; font-family: monospace;">PLATFORM_NAME</td>
+          <td style="padding: 10px 0; font-weight: 700; color: var(--andai-blue);">"AndAI"</td>
+          <td style="padding: 10px 0; color: var(--andai-text-muted);">openedx/envs/common.py</td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--andai-border);">
+          <td style="padding: 10px 0; font-family: monospace;">STUDIO_NAME</td>
+          <td style="padding: 10px 0; font-weight: 700; color: var(--andai-blue);">"AndAI Studio"</td>
+          <td style="padding: 10px 0; color: var(--andai-text-muted);">cms/envs/common.py</td>
+        </tr>
+        <tr style="border-bottom: 1px solid var(--andai-border);">
+          <td style="padding: 10px 0; font-family: monospace;">DEFAULT_SITE_THEME</td>
+          <td style="padding: 10px 0; font-weight: 700; color: var(--andai-blue);">"andai-theme"</td>
+          <td style="padding: 10px 0; color: var(--andai-text-muted);">openedx/envs/common.py</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; font-family: monospace;">ENABLE_COMPREHENSIVE_THEMING</td>
+          <td style="padding: 10px 0; font-weight: 700; color: #16a34a;">True</td>
+          <td style="padding: 10px 0; color: var(--andai-text-muted);">openedx/envs/common.py</td>
+        </tr>
+      </table>
+    </div>
+  </main>
+
+  <!-- 3. LMS Live Footer Preview -->
+  <footer class="preview-footer">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">
+          <img src="lms/static/images/logo.png" alt="AndAI Logo" style="height: 38px;">
+          <span>AndAI</span>
+        </div>
+        <p style="font-size: 0.9rem;">Empowering intelligent learning and skill transformation through AI-first education.</p>
+        <ul class="footer-links">
+          <li><a href="#">About AndAI</a></li>
+          <li><a href="#">Explore Catalog</a></li>
+          <li><a href="#">Contact Us</a></li>
+          <li><a href="#">Help Center</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: white; margin-bottom: 12px; font-size: 0.95rem;">Legal & Trust</h4>
+        <ul class="footer-links" style="flex-direction: column; gap: 8px;">
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Honor Code</a></li>
+          <li><a href="#">Accessibility Statement</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div>&copy; 2026 AndAI. All rights reserved.</div>
+      <div>Powered by Open edX</div>
+    </div>
+  </footer>
+
+</body>
+</html>

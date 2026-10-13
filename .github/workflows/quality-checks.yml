@@ -1,0 +1,72 @@
+name: Quality checks
+
+on:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - master
+      - open-release/lilac.master
+
+jobs:
+  run_tests:
+    name: Quality Others
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        python-version:
+          - "3.12"
+        node-version: [20]
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      - name: Fetch base branch for comparison
+        run: git fetch --depth=1 origin ${{ github.base_ref }}
+
+      - name: Install Required System Packages
+        run: sudo apt-get update && sudo apt-get install libxmlsec1-dev
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Setup npm
+        run: npm i -g npm@8.5.x
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Required Python Dependencies
+        run: |
+          make test-requirements
+
+      - name: Install npm
+        run: npm ci
+
+      - name: Run Quality Tests
+        env:
+          TARGET_BRANCH: ${{ github.base_ref }}
+        run: |
+            uv run ruff check --output-format=github .
+            make xsslint
+            make pii_check
+            make check_keywords
+
+      - name: Save Job Artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Build-Artifacts
+          path: |
+            **/reports/**/*
+            test_root/log/**/*.log
+            *.log
+          overwrite: true

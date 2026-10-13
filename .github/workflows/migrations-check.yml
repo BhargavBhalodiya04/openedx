@@ -1,0 +1,125 @@
+name: Check Django Migrations
+
+on:
+  workflow_dispatch:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - master
+
+jobs:
+  check_migrations:
+    name: check migrations
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04]
+        python-version:
+          - "3.12"
+        # 'pinned' installs whatever Django version `testing` resolves to under the
+        # global `Django<6.0` constraint (currently 5.2.x). To test another supported
+        # version instead, use a value matching a real `djangoNN` dependency-group in
+        # pyproject.toml (e.g. "42" for the `django42` group), synced below.
+        django-version: ["pinned"]
+        mongo-version:
+          - "7"
+        mysql-version: ["8"]
+    services:
+      mongo:
+        image: mongo:${{ matrix.mongo-version }}
+        ports:
+          - 27017:27017
+        # Note: Calling mongo here only works with mongo 4, in newer versions of mongo
+        # we'll have to use `mongosh`, hence the 'which mongosh mongo'.
+        options: >-
+          --health-cmd "$(which mongosh mongo) --quiet --eval 'db.runCommand(\"ping\")'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+      mysql:
+        image: mysql:${{ matrix.mysql-version }}
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_DATABASE: "edxapp"
+          MYSQL_USER: "edxapp001"
+          MYSQL_PASSWORD: "password"
+          MYSQL_RANDOM_ROOT_PASSWORD: true
+        options: >-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    steps:
+      - name: Setup mongodb user
+        run: |
+          docker exec ${{ job.services.mongo.id }} mongosh edxapp --eval '
+            db.createUser(
+              {
+                user: "edxapp",
+                pwd:  "password",
+                roles: [
+                     { role: "readWrite", db: "edxapp" },
+                ]
+              }
+            );
+          '
+
+      - name: Verify mongo and mysql db credentials
+        run: |
+          mysql -h 127.0.0.1 -uedxapp001 -ppassword -e "select 1;" edxapp
+          docker exec ${{ job.services.mongo.id }} mongosh --host 127.0.0.1 --username edxapp --password password --eval 'use edxapp; db.adminCommand("ping");' edxapp
+
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Install system Packages
+        run: |
+          sudo apt-get update
+          make ubuntu-requirements
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: |
+          if [[ "${{ matrix.django-version }}" == "pinned" ]]; then
+            make dev-requirements
+          else
+            uv sync --no-default-groups --group testing --group "django${{ matrix.django-version }}" --frozen
+          fi
+
+      - name: list installed package versions
+        run: |
+          uv tree
+
+      - name: Run Tests
+        env:
+          LMS_CFG: lms/envs/minimal.yml
+          # This is from the LMS dir on purpose since we don't need anything different for the CMS yet.
+          STUDIO_CFG: lms/envs/minimal.yml
+        run: |
+          echo "Running the LMS migrations."
+          uv run ./manage.py lms migrate
+          echo "Running the CMS migrations."
+          uv run ./manage.py cms migrate
+
+  # This job aggregates test results. It's the required check for branch protection.
+  # https://github.com/marketplace/actions/alls-green#why
+  # https://github.com/orgs/community/discussions/33579
+  success:
+    name: Migrations checks successful
+    if: always()
+    needs:
+      - check_migrations
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        # uses: re-actors/alls-green@v1.2.1
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35
+        with:
+          jobs: ${{ toJSON(needs) }}
