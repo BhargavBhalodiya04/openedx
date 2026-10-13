@@ -6,4 +6,4 @@ from openedx.core.djangolib.markup import HTML, Text
 %>
 
 <h1>${Text(_(u"Welcome to {platform_name}")).format(platform_name=settings.PLATFORM_NAME)}</h1>
-<p>${_("Learn without limits with AndAI.")}</p>
+<p>${Text(_(u"Learn without limits with {platform_name}")).format(platform_name=settings.PLATFORM_NAME)}</p>
