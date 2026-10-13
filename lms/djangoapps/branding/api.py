@@ -129,29 +129,15 @@ def _footer_copyright():
 
     """
     return _(
-        # Translators: 'edX' and 'Open edX' are trademarks of 'edX Inc.'.
-        # Please do not translate any of these trademarks and company names.
-        "© {org_name}.  All rights reserved except where noted.  edX, Open edX "
-        "and their respective logos are registered trademarks of edX Inc."
+        "© {org_name}. All rights reserved."
     ).format(org_name=configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME))
 
 
 def _footer_openedx_link():
-    """Return the image link for "Powered by Open edX".
-
-    Args:
-        is_secure (bool): Whether the request is using TLS.
-
-    Returns: dict
-
-    """
-    # Translators: 'Open edX' is a trademark, please keep this untranslated.
-    # See http://openedx.org for more information.
-    title = _("Powered by Open edX")
     return {
-        "url": settings.FOOTER_OPENEDX_URL,
-        "title": title,
-        "image": settings.FOOTER_OPENEDX_LOGO_IMAGE,
+        "url": "",
+        "title": "",
+        "image": "",
     }
 
 

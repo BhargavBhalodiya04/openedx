@@ -31,7 +31,7 @@ django_autodiscover()
 # Must run before any pattern below that uses <course_key:...> or <usage_key:...>.
 register_url_converters()
 
-admin.site.site_header = _('Studio Administration')
+admin.site.site_header = _('AndAI Studio Administration')
 admin.site.site_title = admin.site.site_header
 
 if password_policy_compliance.should_enforce_compliance_on_login():

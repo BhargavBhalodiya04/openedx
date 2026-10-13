@@ -1181,7 +1181,7 @@ FOOTER_OPENEDX_URL = "https://open.edx.org"
 # * https://logos.openedx.org/open-edx-logo-tag.png
 # * https://logos.openedx.org/open-edx-logo-tag-light.png"
 # * https://logos.openedx.org/open-edx-logo-tag-dark.png
-FOOTER_OPENEDX_LOGO_IMAGE = "https://logos.openedx.org/open-edx-logo-tag.png"
+FOOTER_OPENEDX_LOGO_IMAGE = ""
 
 # These are referred to both by the Django asset pipeline
 # AND by the branding footer API, which needs to decide which
