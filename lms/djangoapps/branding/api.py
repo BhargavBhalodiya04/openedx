@@ -134,11 +134,7 @@ def _footer_copyright():
 
 
 def _footer_openedx_link():
-    return {
-        "url": "",
-        "title": "",
-        "image": "",
-    }
+    return None
 
 
 def _footer_social_links():
