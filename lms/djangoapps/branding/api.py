@@ -129,14 +129,14 @@ def _footer_copyright():
 
     """
     return _(
-        "Powered by AndAI | © {org_name}. All rights reserved."
+        "© {org_name}. All rights reserved."
     ).format(org_name=configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME))
 
 
 def _footer_openedx_link():
     return {
-        "url": "/",
-        "title": "Powered by AndAI",
+        "url": "",
+        "title": "",
         "image": "",
     }
 
