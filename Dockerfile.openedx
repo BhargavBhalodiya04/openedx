@@ -24,5 +24,6 @@ COPY lms/djangoapps/branding/api.py /openedx/edx-platform/lms/djangoapps/brandin
 COPY cms/templates/widgets/footer.html /openedx/edx-platform/cms/templates/widgets/footer.html
 COPY cms/templates/widgets/sock.html /openedx/edx-platform/cms/templates/widgets/sock.html
 
-# 4. Copy clean AndAI footer into Indigo theme footer
-COPY themes/andai-theme/lms/templates/footer.html /openedx/themes/indigo/lms/templates/footer.html
+# 4. Copy clean Indigo templates (No 'Powered by Tutor/Open edX' badges, cache-busted AndAI logo)
+COPY themes/indigo-clean-footer.html /openedx/themes/indigo/lms/templates/footer.html
+COPY themes/indigo-navbar-logo.html /openedx/themes/indigo/lms/templates/header/navbar-logo-header.html
