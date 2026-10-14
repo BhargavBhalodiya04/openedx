@@ -1,0 +1,6 @@
+FROM overhangio/openedx-mfe:22.1.0-indigo
+
+# Permanently inject CSS hide rule into all MFE stylesheets to remove edX/Tutor trademarks
+RUN for css in $(find /openedx/dist -name "*.css" 2>/dev/null); do \
+      printf "\n.footer-about-copyright, .footer-content-secondary p, p:has(a[href*=\"edx.org\"]), div:has(> a[href*=\"edx.org\"]), a[href*=\"edx.org\"], [class*=\"trademark\"], footer :is(p,div,span):has(img[alt*=\"Tutor\"]), footer :is(p,div,span):has(img[alt*=\"edX\"]), footer a[href*=\"tutor\"], footer a[href*=\"overhang\"], footer img[alt*=\"Tutor\"], footer img[alt*=\"Open edX\"], .footer-trademark-text, .footer-trademark { display: none !important; }\n" >> "$css"; \
+    done

@@ -1,0 +1,28 @@
+FROM overhangio/openedx:22.0.2-indigo
+
+# 1. Copy AndAI logos into core Open edX source & staticfiles
+COPY lms/static/images/logo.png /openedx/edx-platform/lms/static/images/logo.png
+COPY lms/static/images/logo-large.png /openedx/edx-platform/lms/static/images/logo-large.png
+COPY cms/static/images/studio-logo.png /openedx/edx-platform/cms/static/images/studio-logo.png
+
+COPY lms/static/images/logo.png /openedx/staticfiles/images/logo.png
+COPY lms/static/images/logo-large.png /openedx/staticfiles/images/logo-large.png
+COPY cms/static/images/studio-logo.png /openedx/staticfiles/studio/images/studio-logo.png
+
+# 2. Copy AndAI logos into Indigo Theme (the active theme loaded by Tutor)
+COPY lms/static/images/logo.png /openedx/themes/indigo/lms/static/images/logo.png
+COPY lms/static/images/logo.png /openedx/themes/indigo/lms/static/images/logo-white.png
+COPY cms/static/images/studio-logo.png /openedx/themes/indigo/cms/static/images/studio-logo.png
+
+COPY lms/static/images/logo.png /openedx/staticfiles/indigo/images/logo.png
+COPY lms/static/images/logo.png /openedx/staticfiles/indigo/images/logo-white.png
+COPY lms/static/images/logo.png /openedx/staticfiles/indigo/images/logo.f3a840613c01.png
+COPY lms/static/images/logo.png /openedx/staticfiles/indigo/images/logo-white.fccc31ee581f.png
+
+# 3. Copy clean branding API and Studio footer templates
+COPY lms/djangoapps/branding/api.py /openedx/edx-platform/lms/djangoapps/branding/api.py
+COPY cms/templates/widgets/footer.html /openedx/edx-platform/cms/templates/widgets/footer.html
+COPY cms/templates/widgets/sock.html /openedx/edx-platform/cms/templates/widgets/sock.html
+
+# 4. Copy clean AndAI footer into Indigo theme footer
+COPY themes/andai-theme/lms/templates/footer.html /openedx/themes/indigo/lms/templates/footer.html
